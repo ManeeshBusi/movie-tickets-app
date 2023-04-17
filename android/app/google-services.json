@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "698219637049",
+    "project_id": "move-ticket-app",
+    "storage_bucket": "move-ticket-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698219637049:android:284ad710aa2b34889de0e8",
+        "android_client_info": {
+          "package_name": "com.moveticketapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "698219637049-3psm5tsad3amdsr65mmdin3pd8ssj01f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moveticketapp",
+            "certificate_hash": "fbe1cc121de9b5125991266d0097e1f3896b4f51"
+          }
+        },
+        {
+          "client_id": "698219637049-tkgdu28t0kcjn2mjm2prdjqca283tp0g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moveticketapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "698219637049-d721l5562v817a89tv40q9f5n5rkmcsc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN4XcIGvgNC0UfZgTSLEJ93FFAqnaJ3JM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "698219637049-4p7uuvduld1gpdne9girph5tfe3bp4t9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
