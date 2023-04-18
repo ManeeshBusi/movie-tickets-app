@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
-const API_URL = 'http://10.0.2.2:3000';
+export const API_URL = 'http://10.0.2.2:3000';
+export const TMDB_URL = 'https://api.themoviedb.org/3/search/movie?';
+export const TMDB_KEY = 'b36be16db427f6f84a8c93802b633757';
 const WEB_CLIENT_ID =
   '698219637049-d721l5562v817a89tv40q9f5n5rkmcsc.apps.googleusercontent.com';
 const SCOPE = ['https://www.googleapis.com/auth/gmail.readonly'];

@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 //import liraries
-import React, {useRef} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -21,11 +21,19 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Svg, G, Rect} from 'react-native-svg';
 import Text from '../Utils/Text';
 import Field from '../Components/DataField.component';
+import {useSelector, useDispatch} from 'react-redux';
+import {getTickets} from '../Store/userSlice';
+import {API_URL} from '../Utils/api';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 // create a component
 const {width} = Dimensions.get('window');
 const TicketScreen = () => {
   const data = moviesData;
+  const dispatch = useDispatch();
+  const {user, tickets} = useSelector(state => state.user);
+
+  const [mess, setMess] = useState([]);
 
   const ITEM_SIZE = 320;
   const ITEM_WIDTH = 282;
@@ -35,6 +43,21 @@ const TicketScreen = () => {
 
   const spacing = (width - ITEM_SIZE) / 2;
 
+  useEffect(() => {
+    // dispatch(getTickets());
+    const getM = async () => {
+      try {
+        const movieData = await fetch(
+          'https://api.themoviedb.org/3/search/movie?api_key=b36be16db427f6f84a8c93802b633757&query=dasara',
+        );
+        console.log(movieData);
+      } catch (err) {
+        console.log('EOROROR', err);
+      }
+    };
+    getM();
+  }, []);
+  console.log('MESS1', tickets);
   const renderItem = ({item, index}) => {
     if (!item.name) {
       return <View style={{width: spacing}} />;
