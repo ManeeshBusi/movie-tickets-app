@@ -4,20 +4,21 @@ import {
   GoogleSignin,
   GoogleSigninButton,
 } from '@react-native-google-signin/google-signin';
-import React, {Component, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {View, Text, StyleSheet, Button} from 'react-native';
-import {signInWithGoogleAsync, signOut} from '../Utils/api';
-import {getToken, getUser, signInWithGoogle} from '../Store/userSlice';
+import {View, StyleSheet, Button} from 'react-native';
+import {signOut} from '../Utils/api';
+import {setUser, signInAgain, signInWithGoogle} from '../Store/userSlice';
 // create a component
 const LoginScreen = ({navigation}) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const {fetchingToken, user} = useSelector(state => state.user);
   const dispatch = useDispatch();
+
   console.log('USERRR', user);
+
   const signInWithGoogleAction = () => {
     dispatch(signInWithGoogle());
-    console.log(!user);
     setIsLoggedIn(true);
   };
 
@@ -30,36 +31,25 @@ const LoginScreen = ({navigation}) => {
     }
   };
 
-  // useEffect(() => {
-  //   const isSignedIn = async () => {
-  //     const isSigned = await GoogleSignin.isSignedIn();
-  //     const use = await GoogleSignin.getCurrentUser();
-  //     console.log('CUUU', use);
-  //     // const {accessToken} = await GoogleSignin.getTokens();
-  //     // dispatch(getUser(use));
-  //     // dispatch(getToken(accessToken));
-  //     setIsLoggedIn(isSigned);
-  //   };
-  //   console.log(Object.keys(user).length);
-  //   isSignedIn();
-  // }, []);
+  useEffect(() => {
+    const isSignedIn = async () => {
+      const isSigned = await GoogleSignin.isSignedIn();
+      if (isSigned) {
+        console.log("ITS LOGGED IN")
+        dispatch(signInAgain());
+        setIsLoggedIn(isSigned);
+      }
+    };
+    // console.log(Object.keys(user).length);
+    isSignedIn();
+  }, []);
 
-  // useEffect(() => {
-  //   const getCurrUser = async () => {
-  //     const currUser = await GoogleSignin.getCurrentUser();
-  //     console.log('ALRADY TRHERE', currUser);
-  //     const {accessToken} = await GoogleSignin.getTokens();
-  //     dispatch(getUser(currUser));
-  //     dispatch(getToken(accessToken));
-  //   };
-  //   if (!user) {
-  //     getCurrUser();
-  //     setTimeout(() => {
-  //       gotonext();
-  //     }, 5000);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isLoggedIn]);
+  useEffect(() => {
+    if (isLoggedIn) {
+      // gotonext();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
 
   const gotonext = () => {
     navigation.navigate('Ticket');

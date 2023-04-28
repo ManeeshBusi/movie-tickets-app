@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
+// export const API_URL = 'http://192.168.1.31:3000';OBGFabIKLswXFb5g
 export const API_URL = 'http://10.0.2.2:3000';
 export const TMDB_URL = 'https://api.themoviedb.org/3/search/movie?';
 export const TMDB_KEY = 'b36be16db427f6f84a8c93802b633757';

@@ -1,39 +1,26 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 //import liraries
-import React, {useRef, useEffect, useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  Animated,
-  Image,
-  StatusBar,
-} from 'react-native';
+import React, {useRef, useEffect} from 'react';
+import {View, StyleSheet, Dimensions, Animated, StatusBar} from 'react-native';
 import CutSvg from '../Components/CutSvg.component';
-import {
-  bg_path,
-  moviesData,
-  opacityConverter,
-  poster_path,
-} from '../Utils/Constants';
+import {bg_path, opacityConverter, poster_path} from '../Utils/Constants';
 import LinearGradient from 'react-native-linear-gradient';
 import {Svg, G, Rect} from 'react-native-svg';
 import Text from '../Utils/Text';
 import Field from '../Components/DataField.component';
 import {useSelector, useDispatch} from 'react-redux';
 import {getTickets} from '../Store/userSlice';
-import {API_URL} from '../Utils/api';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import FastImage from 'react-native-fast-image';
 
 // create a component
 const {width} = Dimensions.get('window');
+const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
 const TicketScreen = () => {
-  const data = moviesData;
   const dispatch = useDispatch();
-  const {user, tickets} = useSelector(state => state.user);
+  const {tickets, user} = useSelector(state => state.user);
 
-  const [mess, setMess] = useState([]);
+  console.log('TICKERTSSS', tickets);
 
   const ITEM_SIZE = 320;
   const ITEM_WIDTH = 282;
@@ -44,20 +31,9 @@ const TicketScreen = () => {
   const spacing = (width - ITEM_SIZE) / 2;
 
   useEffect(() => {
-    // dispatch(getTickets());
-    const getM = async () => {
-      try {
-        const movieData = await fetch(
-          'https://api.themoviedb.org/3/search/movie?api_key=b36be16db427f6f84a8c93802b633757&query=dasara',
-        );
-        console.log(movieData);
-      } catch (err) {
-        console.log('EOROROR', err);
-      }
-    };
-    getM();
-  }, []);
-  console.log('MESS1', tickets);
+    dispatch(getTickets());
+  }, [dispatch]);
+
   const renderItem = ({item, index}) => {
     if (!item.name) {
       return <View style={{width: spacing}} />;
@@ -74,7 +50,7 @@ const TicketScreen = () => {
     });
 
     return (
-      <View style={[styles.ticket, {width: ITEM_SIZE}]}>
+      <View style={[styles.ticket, {width: ITEM_SIZE}]} key={item.bookingId}>
         <Animated.View
           style={[
             styles.ticketWrapper,
@@ -86,7 +62,7 @@ const TicketScreen = () => {
               locations={[0.3, 0.8]}
               style={styles.gradient}
             />
-            <Image
+            <FastImage
               source={{uri: poster_path + item.img}}
               style={[styles.poster, {width: ITEM_WIDTH, height: ITEM_HEIGHT}]}
             />
@@ -147,43 +123,58 @@ const TicketScreen = () => {
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
 
-      <View style={[StyleSheet.absoluteFill]}>
-        {data.map((item, index) => {
-          const inputRange = [
-            (index - 1) * ITEM_SIZE,
-            index * ITEM_SIZE,
-            (index + 1) * ITEM_SIZE,
-          ];
-          const opacity = scrollX.interpolate({
-            inputRange,
-            outputRange: [0, 1, 0],
-          });
+      {tickets.length !== 0 ? (
+        <>
+          <View style={[StyleSheet.absoluteFill]}>
+            {tickets.map((item, index) => {
+              const inputRange = [
+                (index - 1) * ITEM_SIZE,
+                index * ITEM_SIZE,
+                (index + 1) * ITEM_SIZE,
+              ];
+              const opacity = scrollX.interpolate({
+                inputRange,
+                outputRange: [0, 1, 0],
+              });
 
-          return (
-            <Animated.Image
-              key={item.id}
-              source={{uri: bg_path + item.bg}}
-              style={[StyleSheet.absoluteFill, {opacity}]}
-            />
-          );
-        })}
-        <View style={[styles.overlay, StyleSheet.absoluteFillObject]} />
-      </View>
+              return (
+                <AnimatedFastImage
+                  key={item.id}
+                  source={{uri: bg_path + item.bg}}
+                  style={[StyleSheet.absoluteFill, {opacity}]}
+                />
+              );
+            })}
+            <View style={[styles.overlay, StyleSheet.absoluteFillObject]} />
+          </View>
 
-      <Animated.FlatList
-        data={[{id: 'left'}, ...data, {id: 'right'}]}
-        horizontal
-        decelerationRate={0}
-        keyExtractor={item => item.id}
-        snapToInterval={ITEM_SIZE}
-        showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {useNativeDriver: true},
-        )}
-        scrollEventThrottle={16}
-        renderItem={renderItem}
-      />
+          <Animated.FlatList
+            data={[{bookingId: 'left'}, ...tickets, {bookingId: 'right'}]}
+            horizontal
+            decelerationRate={0}
+            keyExtractor={(item, index) => {
+              return item.bookingId;
+            }}
+            snapToInterval={ITEM_SIZE}
+            showsHorizontalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{nativeEvent: {contentOffset: {x: scrollX}}}],
+              {useNativeDriver: true},
+            )}
+            scrollEventThrottle={16}
+            renderItem={renderItem}
+            removeClippedSubviews={true}
+            initialNumToRender={3}
+            maxToRenderPerBatch={4}
+            updateCellsBatchingPeriod={800}
+            windowSize={4}
+          />
+        </>
+      ) : (
+        <View>
+          <Text>SOMETHING</Text>
+        </View>
+      )}
     </View>
   );
 };
