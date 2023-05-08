@@ -32,6 +32,8 @@
 		B09BDDB78B7D4D8691C11CAB /* Urbanist-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7241C380E5F24B17A3B664F1 /* Urbanist-SemiBoldItalic.ttf */; };
 		227BC774139B42E186CAC744 /* Urbanist-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA6199D64DFF4A65891C4CE6 /* Urbanist-Thin.ttf */; };
 		817223D5335445DA89CC3F3D /* Urbanist-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DAA9A12D344C4C7C98ECECC3 /* Urbanist-ThinItalic.ttf */; };
+		F14771A7AD6244908686953F /* August-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 000CCD7262F444B5B188AB61 /* August-Bold.ttf */; };
+		2B732C5E262E4972A26AE8A4 /* DeathStar.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F049759915F54787AABF30C3 /* DeathStar.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +82,8 @@
 		7241C380E5F24B17A3B664F1 /* Urbanist-SemiBoldItalic.ttf */ = {isa = PBXFileReference; name = "Urbanist-SemiBoldItalic.ttf"; path = "../src/Assets/fonts/Urbanist-SemiBoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		FA6199D64DFF4A65891C4CE6 /* Urbanist-Thin.ttf */ = {isa = PBXFileReference; name = "Urbanist-Thin.ttf"; path = "../src/Assets/fonts/Urbanist-Thin.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		DAA9A12D344C4C7C98ECECC3 /* Urbanist-ThinItalic.ttf */ = {isa = PBXFileReference; name = "Urbanist-ThinItalic.ttf"; path = "../src/Assets/fonts/Urbanist-ThinItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		000CCD7262F444B5B188AB61 /* August-Bold.ttf */ = {isa = PBXFileReference; name = "August-Bold.ttf"; path = "../src/Assets/fonts/August-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F049759915F54787AABF30C3 /* DeathStar.ttf */ = {isa = PBXFileReference; name = "DeathStar.ttf"; path = "../src/Assets/fonts/DeathStar.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +210,8 @@
 				7241C380E5F24B17A3B664F1 /* Urbanist-SemiBoldItalic.ttf */,
 				FA6199D64DFF4A65891C4CE6 /* Urbanist-Thin.ttf */,
 				DAA9A12D344C4C7C98ECECC3 /* Urbanist-ThinItalic.ttf */,
+				000CCD7262F444B5B188AB61 /* August-Bold.ttf */,
+				F049759915F54787AABF30C3 /* DeathStar.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -325,6 +331,8 @@
 				B09BDDB78B7D4D8691C11CAB /* Urbanist-SemiBoldItalic.ttf in Resources */,
 				227BC774139B42E186CAC744 /* Urbanist-Thin.ttf in Resources */,
 				817223D5335445DA89CC3F3D /* Urbanist-ThinItalic.ttf in Resources */,
+				F14771A7AD6244908686953F /* August-Bold.ttf in Resources */,
+				2B732C5E262E4972A26AE8A4 /* DeathStar.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

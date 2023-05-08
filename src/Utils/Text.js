@@ -5,7 +5,7 @@ import {Text as ReactNativeText} from 'react-native';
 
 // create a component
 const Text = props => {
-  const {fz, type} = props;
+  const {fz, type, color} = props;
   var font = 'Regular';
   switch (type) {
     case 'bold':
@@ -15,10 +15,11 @@ const Text = props => {
     default:
       break;
   }
+  var customColor = color ? color : 'white';
   return (
     <ReactNativeText
       // eslint-disable-next-line react-native/no-inline-styles
-      style={{fontSize: fz, color: 'white', fontFamily: 'Urbanist-' + font}}>
+      style={{fontSize: fz, color: customColor, fontFamily: 'Urbanist-' + font}}>
       {props.children}
     </ReactNativeText>
   );

@@ -6,16 +6,22 @@ import {
 } from '@react-native-google-signin/google-signin';
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {View, StyleSheet, Button} from 'react-native';
+import {View, StyleSheet, Button, StatusBar, Dimensions} from 'react-native';
 import {signOut} from '../Utils/api';
-import {setUser, signInAgain, signInWithGoogle} from '../Store/userSlice';
+import {
+  refreshTickets,
+  signInAgain,
+  signInWithGoogle,
+} from '../Store/userSlice';
+import FastImage from 'react-native-fast-image';
 // create a component
+
 const LoginScreen = ({navigation}) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const {fetchingToken, user} = useSelector(state => state.user);
-  const dispatch = useDispatch();
+  const {fetchingToken, user} = useSelector(state => state);
+  const totalState = useSelector(state => state);
 
-  console.log('USERRR', user);
+  const dispatch = useDispatch();
 
   const signInWithGoogleAction = () => {
     dispatch(signInWithGoogle());
@@ -35,21 +41,19 @@ const LoginScreen = ({navigation}) => {
     const isSignedIn = async () => {
       const isSigned = await GoogleSignin.isSignedIn();
       if (isSigned) {
-        console.log("ITS LOGGED IN")
+        console.log('ITS LOGGED IN');
         dispatch(signInAgain());
         setIsLoggedIn(isSigned);
       }
     };
     // console.log(Object.keys(user).length);
     isSignedIn();
-  }, []);
+  }, [dispatch]);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      // gotonext();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
+  // useEffect(() => {
+  //   console.log('TOKEN FET', fetchingToken);
+  //   console.log('HERE USER', user);
+  // }, [fetchingToken, user]);
 
   const gotonext = () => {
     navigation.navigate('Ticket');
@@ -57,17 +61,26 @@ const LoginScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" />
+      <View style={[StyleSheet.absoluteFill]}>
+        {/* <FastImage source={require("../Assets/images/pulp.png")} style={StyleSheet.absoluteFill}/> */}
+        <View style={[styles.overlay, StyleSheet.absoluteFillObject]} />
+      </View>
       <GoogleSigninButton
-        style={{width: 192, height: 48}}
+        style={styles.signInButton}
         size={GoogleSigninButton.Size.Wide}
         onPress={signInWithGoogleAction}
         disabled={fetchingToken}
       />
-      {isLoggedIn && (
-        <>
-          <Button title="See Tickets" onPress={gotonext} />
-        </>
-      )}
+      {/* {isLoggedIn && ( */}
+      <>
+        <Button title="See Tickets" onPress={gotonext} />
+        <Button
+          title="refresh tickets"
+          onPress={() => dispatch(refreshTickets())}
+        />
+      </>
+      {/* )} */}
       <Button title="Logout" onPress={signOutUser} />
     </View>
   );
@@ -79,9 +92,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#171725',
+  },
+  signInButton: {
+    width: 192,
+    height: 48,
+  },
+  overlay: {
+    position: 'absolute',
+    flex: 1,
+    backgroundColor: 'black',
+    opacity: 0.8,
   },
 });
+
+// bg 171727
+// light CEB1BE
+// blue 6DB1BF
+// accent FFC857
+// pink F39A9D
+// text1 DFFDFF DFFDFF
 
 //make this component available to the app
 export default LoginScreen;

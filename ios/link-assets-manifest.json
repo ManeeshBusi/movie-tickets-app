@@ -2,6 +2,14 @@
   "migIndex": 1,
   "data": [
     {
+      "path": "src/Assets/fonts/August-Bold.ttf",
+      "sha1": "4f8cbfcabc05161b2952ba7c016d00a969552409"
+    },
+    {
+      "path": "src/Assets/fonts/DeathStar.ttf",
+      "sha1": "3ed84bc2890dd917cc75809b5620f233d1f53d8f"
+    },
+    {
       "path": "src/Assets/fonts/Urbanist-Black.ttf",
       "sha1": "3c00d76ea4a37217204b6a2f56e5a6c6a979b35f"
     },

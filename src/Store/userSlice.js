@@ -3,9 +3,7 @@ import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import {API_URL} from '../Utils/api';
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
-import ImageColors from 'react-native-image-colors';
-import {poster_path, rgbConverter} from '../Utils/Constants';
-// import {colorcolor} from 'colorcolor';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WEB_CLIENT_ID =
   '698219637049-d721l5562v817a89tv40q9f5n5rkmcsc.apps.googleusercontent.com';
@@ -26,11 +24,14 @@ const initialState = {
   tickets: [],
   fetchingTickets: false,
   fetchingToken: false,
+  fetchedMessages: false,
+  isLoggedIn: false,
 };
 
 async function apiLogin(userInfo) {
   try {
-    await fetch(`${API_URL}/auth/login`, {
+    console.log('IN API LOGIN');
+    const user = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -38,54 +39,70 @@ async function apiLogin(userInfo) {
       },
       body: JSON.stringify(userInfo),
     }).then(data => data.json());
+    console.log('API LOGIN DONE');
+    return user;
   } catch (e) {
     console.log('ERROR LOGIN', e);
   }
 }
 
-async function fetchTicketWithToken() {
-  var res = await fetch(`${API_URL}/messages`).then(data => data.json());
+// async function fetchTicketWithToken(userId) {
+//   var res = await fetch(`${API_URL}/tickets/${userId}`).then(data =>
+//     data.json(),
+//   );
+//   // if (res.code === 401) {
+//   //   return res;
+//   // }
 
-  if (res.code === 401) {
-    return res;
-  }
-  // for (var i = 0; i < res.messages.length; i++) {
-  //   console.log('MOVIE DOM COLOR', res.messages[i].domColor);
-  //   console.log(
-  //     `CHANGFED COLOR rgba(${res.messages[i].domColor[0]}, ${res.messages[i].domColor[1]}, ${res.messages[i].domColor[2]}, 0.96)`,
-  //   );
-  //   const result = await ImageColors.getColors(
-  //     poster_path + res.messages[i].img,
-  //   );
-  //   res.messages[i].color = rgbConverter(result.darkVibrant);
-  //   // res.messages[i].color = 'rgba(51, 51, 51, 0.96)';
-  // }
-  return res.messages;
-}
+//   return res;
+// }
 
 export const getTickets = createAsyncThunk(
   'user/getTickets',
   async (args, thunkAPI) => {
-    const state = thunkAPI.getState().user;
+    const state = thunkAPI.getState();
+    // let res = await fetchTicketWithToken(state?.user?._id);
+    try {
+      let res = await fetch(`${API_URL}/tickets/${state.user._id}`).then(data =>
+        data.json(),
+      );
+      console.log('TICKETS REDUX', res);
+      return res;
+    } catch (e) {
+      console.log('Error getting tickets', e);
+    }
+  },
+);
 
-    let res = await fetchTicketWithToken();
-    if (res.code == 401) {
+export const refreshTickets = createAsyncThunk(
+  'user/refreshTickets',
+  async (args, thunkAPI) => {
+    const state = thunkAPI.getState();
+    console.log('REFRESH STATE', state);
+    let res = await fetch(`${API_URL}/gmail/latest/${state.user._id}`);
+    console.log('REFRESH CODE', res.status);
+    if (res.status == 200) {
+      return true;
+    } else {
       console.log('YEP ', state.user);
+      const {email, name, picture} = state.user;
       await GoogleSignin.clearCachedAccessToken(state.user.accessToken);
       console.log('YEP 2');
       const {accessToken} = await GoogleSignin.getTokens();
       state.user.accessToken = accessToken;
-      await apiLogin({accessToken});
+      await apiLogin({email, name, picture, accessToken});
       console.log('YEP 3');
-      res = await fetchTicketWithToken();
+      res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
+      if (res.code == 200) {
+        return true;
+      }
     }
-    return res;
   },
 );
 
 export const signInWithGoogle = createAsyncThunk(
   'user/signInWithGoogle',
-  async thunkAPI => {
+  async (args, thunkAPI) => {
     try {
       const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
@@ -101,19 +118,13 @@ export const signInWithGoogle = createAsyncThunk(
           const creds = await auth().signInWithCredential(googleCreds);
           return creds.additionalUserInfo.profile;
         });
-      // console.log('HERE 2');
-      // const {name, email, photo} = userAv.additionalUserInfo.profile;
+
       const {email, name, picture} = userAv;
       const {accessToken} = await GoogleSignin.getTokens();
       // console.log('HERE 3');
-      await apiLogin({email, name, picture, accessToken});
-      // console.log('HERE 4');
-      return {
-        name,
-        email,
-        picture,
-        accessToken,
-      };
+      const userDetails = await apiLogin({email, name, picture, accessToken});
+
+      return userDetails;
     } catch (e) {
       console.log('ERRRRR LOGGGG', e);
     }
@@ -128,11 +139,26 @@ export const signInAgain = createAsyncThunk(
       const {name, photo: picture, email} = currentUser.user;
       const {accessToken} = await GoogleSignin.getTokens();
 
-      await apiLogin({email, name, picture, accessToken});
+      const userDetails = await apiLogin({email, name, picture, accessToken});
 
-      return {name, email, picture, accessToken};
+      return userDetails;
     } catch (e) {
       console.log('ERRRR LOG', e);
+    }
+  },
+);
+
+export const addNewMovie = createAsyncThunk(
+  'user/addNewMovie',
+  async (args, thunkAPI) => {
+    try {
+      const movieDetails = args;
+      const state = thunkAPI.getState();
+      console.log('ADDED MOVIE', movieDetails);
+      let res = await fetch(`${API_URL}/tickets/add/${state.user?._id}`);
+      return movieDetails;
+    } catch (e) {
+      console.log('Error LOG', e);
     }
   },
 );
@@ -156,7 +182,9 @@ export const userSlice = createSlice({
       })
       .addCase(getTickets.fulfilled, (state, action) => {
         state.fetchingTickets = false;
-        state.tickets = action.payload;
+        if (action.payload.length !== 0) {
+          state.tickets = action.payload;
+        }
       })
       .addCase(getTickets.rejected, state => {
         state.fetchingTickets = false;
@@ -166,6 +194,7 @@ export const userSlice = createSlice({
       })
       .addCase(signInWithGoogle.fulfilled, (state, action) => {
         state.fetchingToken = false;
+        state.isLoggedIn = true;
         state.user = action.payload;
       })
       .addCase(signInWithGoogle.rejected, state => {
@@ -180,6 +209,12 @@ export const userSlice = createSlice({
       })
       .addCase(signInAgain.rejected, state => {
         state.fetchingToken = false;
+      })
+      .addCase(refreshTickets.fulfilled, (state, action) => {
+        state.fetchedMessages = action.payload;
+      })
+      .addCase(addNewMovie.fulfilled, (state, action) => {
+        state.tickets.push(action.payload);
       });
   },
 });
