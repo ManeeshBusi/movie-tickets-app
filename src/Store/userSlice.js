@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import {API_URL} from '../Utils/api';
+import {API_URL, signOut} from '../Utils/api';
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -131,6 +131,17 @@ export const signInWithGoogle = createAsyncThunk(
   },
 );
 
+export const signOutGoogle = createAsyncThunk(
+  'user/signOutGoogle',
+  async thunkAPI => {
+    try {
+      await signOut();
+    } catch (e) {
+      console.log('Errpr signing out', e);
+    }
+  },
+);
+
 export const signInAgain = createAsyncThunk(
   'user/signInAgain',
   async thunkAPI => {
@@ -215,6 +226,9 @@ export const userSlice = createSlice({
       })
       .addCase(addNewMovie.fulfilled, (state, action) => {
         state.tickets.push(action.payload);
+      })
+      .addCase(signOutGoogle.fulfilled, state => {
+        state.isLoggedIn = false;
       });
   },
 });

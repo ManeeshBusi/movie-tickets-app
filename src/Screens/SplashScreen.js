@@ -8,7 +8,7 @@ import {useSelector} from 'react-redux';
 
 export default function SplashScreen() {
   const {isLoggedIn} = useSelector(state => state);
-  const RootNavigator = CreateRootNavigator(false);
+  const RootNavigator = CreateRootNavigator(isLoggedIn);
   return (
     <PaperProvider>
       <>

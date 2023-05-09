@@ -9,12 +9,16 @@ import {
   Animated,
   ImageBackground,
   Pressable,
+  Button,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {GoogleSigninButton} from '@react-native-google-signin/google-signin';
 import {useDispatch, useSelector} from 'react-redux';
 import {signInWithGoogle} from '../Store/userSlice';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+// import {Button} from 'react-native-paper';
+import FastImage from 'react-native-fast-image';
 
 const {width: PAGE_WIDTH, height: PAGE_HEIGHT} = Dimensions.get('window');
 
@@ -28,15 +32,24 @@ export default function OnBoardingScreen() {
     {
       id: 1,
       title: (
-        <View>
-          <Text>Welcome</Text>
-        </View>
+        <>
+          <Text
+            style={{color: 'white', fontSize: 42, fontFamily: 'Urbanist-Bold'}}>
+            Welcome to{' '}
+          </Text>
+          <Text style={{fontFamily: 'DeathStar', fontSize: 42, color: 'red'}}>
+            ShowTime
+          </Text>
+        </>
       ),
       description: (
-        <Text>
-          Welcome to{' '}
-          <Text style={{fontFamily: 'DeathStar', color: 'red'}}>ShowTime</Text>,
-          the ultimate movie tracker! Keep track of all the movies you watch in
+        <Text
+          style={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: 18,
+            fontFamily: 'Urbanist-Regular',
+          }}>
+          The ultimate movie tracker! Keep track of all the movies you watch in
           theatres and discover new ones to add to your watchlist.
         </Text>
       ),
@@ -44,30 +57,63 @@ export default function OnBoardingScreen() {
     },
     {
       id: 2,
-      title: <View></View>,
+      title: (
+        <Text
+          style={{color: 'white', fontSize: 42, fontFamily: 'Urbanist-Bold'}}>
+          Explore Movies!
+        </Text>
+      ),
       description: (
-        <Text>
+        <Text
+          style={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: 18,
+            fontFamily: 'Urbanist-Regular',
+          }}>
           With ShowTime, you can keep track of your movie adventures, explore
           new movies, and get personalized recommendations based on your
           favorites.
         </Text>
       ),
-      background: require('../Assets/images/joker.jpg'),
+      background: require('../Assets/images/akira.jpg'),
     },
     {
       id: 3,
-      title: <View></View>,
-      description: (
-        <View>
-          <GoogleSigninButton
-            style={styles.signInButton}
-            size={GoogleSigninButton.Size.Standard}
-            onPress={signInWithGoogleAction}
-            disabled={fetchingToken}
-          />
-        </View>
+      title: (
+        <Text
+          style={{color: 'white', fontSize: 42, fontFamily: 'Urbanist-Bold'}}>
+          Sign In to get started!
+        </Text>
       ),
-      background: require('../Assets/images/batman.jpg'),
+      description: (
+        // <GoogleSigninButton
+        //   style={styles.signInButton}
+        //   size={GoogleSigninButton.Size.Wide}
+        //   onPress={signInWithGoogleAction}
+        //   disabled={fetchingToken}
+        // />
+        <TouchableOpacity
+          onPress={signInWithGoogleAction}
+          style={{
+            flex: 1,
+            backgroundColor: 'white',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 48,
+            borderRadius: 24,
+          }}>
+          <FastImage
+            source={require('../Assets/images/google-logo.png')}
+            style={{width: 25, height: 25}}
+            resizeMode="contain"
+          />
+          <Text style={{color: 'gray', marginHorizontal: 12, fontWeight: 500}}>
+            Sign in with Google
+          </Text>
+        </TouchableOpacity>
+      ),
+      background: require('../Assets/images/joker.jpg'),
     },
   ];
 
@@ -95,7 +141,7 @@ export default function OnBoardingScreen() {
           <View
             style={{
               flex: 1,
-              padding: 16,
+              padding: 24,
             }}>
             <View
               style={{
@@ -103,40 +149,40 @@ export default function OnBoardingScreen() {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text
-                style={{
-                  fontSize: 54,
-                  fontFamily: 'DeathStar',
-                  color: 'rgba(255, 56, 56, 0.9)',
-                }}>
-                ShowTime
-              </Text>
-              {item.description}
-            </View>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}>
-              {index !== 0 ? (
-                <Pressable
-                  onPress={() => setIndex(index - 1)}
-                  style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 25,
-                    borderWidth: 2,
-                    borderColor: '#FFF',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Icon name="arrow-back" size={25} color="#FFF" />
-                </Pressable>
-              ) : (
-                <View />
-              )}
+              <View style={{marginTop: 64}}>{item.title}</View>
               {index !== PAGES.length - 1 && (
+                <View style={{marginVertical: 32}}>{item.description}</View>
+              )}
+              {/* {item.description} */}
+            </View>
+            {index !== PAGES.length - 1 ? (
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                {index !== 0 ? (
+                  <Pressable
+                    onPress={() => setIndex(index - 1)}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      borderWidth: 2,
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Icon
+                      name="arrow-back"
+                      size={25}
+                      color="rgba(255, 255, 255, 0.5)"
+                    />
+                  </Pressable>
+                ) : (
+                  <View />
+                )}
                 <Pressable
                   onPress={() => setIndex(index + 1)}
                   style={{
@@ -144,14 +190,27 @@ export default function OnBoardingScreen() {
                     height: 50,
                     borderRadius: 25,
                     borderWidth: 2,
-                    borderColor: '#FFF',
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}>
-                  <Icon name="arrow-forward" size={25} color="#FFF" />
+                  <Icon
+                    name="arrow-forward"
+                    size={25}
+                    color="rgba(255, 255, 255, 0.5)"
+                  />
                 </Pressable>
-              )}
-            </View>
+              </View>
+            ) : (
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                {item.description}
+              </View>
+            )}
           </View>
         </ImageBackground>
       </View>
@@ -209,5 +268,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: 'black',
     opacity: 0.4,
+  },
+  signInButton: {
+    width: '100%',
+    height: 48,
+    borderRadius: 24,
   },
 });
