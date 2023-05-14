@@ -1,11 +1,8 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
-//import liraries
 import React, {useRef, useEffect, useState, useCallback} from 'react';
 import {
   View,
-  ScrollView,
-  Button,
   StyleSheet,
   Dimensions,
   Animated,
@@ -17,7 +14,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import CutSvg from '../Components/CutSvg.component';
-import {opacityConverter} from '../Utils/Constants';
+import {contrastCalc, opacityConverter} from '../Utils/Constants';
 import LinearGradient from 'react-native-linear-gradient';
 import {Svg, G, Rect} from 'react-native-svg';
 import Text from '../Utils/Text';
@@ -25,33 +22,30 @@ import Field from '../Components/DataField.component';
 import {useSelector, useDispatch} from 'react-redux';
 import {addNewMovie, getTickets, refreshTickets} from '../Store/userSlice';
 import FastImage from 'react-native-fast-image';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TimePickerModal, DatePickerModal} from 'react-native-paper-dates';
-import {TextInput} from 'react-native-paper';
+import {TextInput, useTheme, Button} from 'react-native-paper';
 import moment from 'moment';
+import IconButton from '../Components/IconButton.component';
 
-// create a component
 const {width} = Dimensions.get('window');
 const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
+const ITEM_SIZE = 320;
+const ITEM_WIDTH = 282;
+const ITEM_HEIGHT = 423;
+
 const TicketScreen = ({navigation}) => {
   const dispatch = useDispatch();
+  // eslint-disable-next-line no-unused-vars
   const {tickets, user, fetchedMessages} = useSelector(state => state);
   const [refreshing, setRefreshing] = useState(false);
   const [tes, setTes] = useState(false);
 
-  console.log('TICKERTSSS', user);
-
-  const ITEM_SIZE = 320;
-  const ITEM_WIDTH = 282;
-  const ITEM_HEIGHT = 423;
   const scrollX = useRef(new Animated.Value(0)).current;
   const dashes = new Array(Math.floor(ITEM_WIDTH / 16)).fill(null);
 
   const spacing = (width - ITEM_SIZE) / 2;
 
   useEffect(() => {
-    console.log('MESSAGES GMAIL', fetchedMessages);
     dispatch(getTickets()).then(() => {
       setTes(true);
     });
@@ -63,6 +57,8 @@ const TicketScreen = ({navigation}) => {
     if (!item.date) {
       return <View style={{width: spacing}} key={item._id} />;
     }
+
+    const contrast = contrastCalc(movieDetails.color, colors.text);
 
     const mildColor = opacityConverter(movieDetails.color);
     const translateY = scrollX.interpolate({
@@ -99,23 +95,39 @@ const TicketScreen = ({navigation}) => {
               {width: ITEM_WIDTH, backgroundColor: movieDetails.color},
             ]}>
             <View style={[styles.ticketDetails, {width: ITEM_WIDTH}]}>
-              <Text fz={26} type="bold">
-                {movieDetails.title}
-              </Text>
+              <TouchableOpacity
+                onPress={
+                  () => navigation.navigate('Movie', {movie: movieDetails})
+                  // navigation.navigate('Movie', {movieId: movieDetails.tmdbId})
+                }>
+                <Text
+                  color={!contrast && colors.textDark}
+                  variant="headlineMedium">
+                  {movieDetails.title}
+                </Text>
+              </TouchableOpacity>
               <View
                 style={{flexDirection: 'row', marginTop: 8, marginBottom: 4}}>
                 <Field
                   type="field"
                   icon="calendar-blank-outline"
                   text={item.date}
+                  flex={1.8}
+                  color={contrast ? colors.text : colors.textDark}
                 />
                 <Field
                   type="field"
                   icon="clock-time-five-outline"
                   text={item.time}
+                  flex={1.2}
+                  color={contrast ? colors.text : colors.textDark}
                 />
               </View>
-              <Field icon="map-marker-outline" text={item.location} />
+              <Field
+                icon="map-marker-outline"
+                text={item.location}
+                color={contrast ? colors.text : colors.textDark}
+              />
 
               <Svg height="12" width="100%" style={{marginVertical: 8}}>
                 <G>
@@ -126,7 +138,7 @@ const TicketScreen = ({navigation}) => {
                       y="10"
                       width="16"
                       height="10"
-                      fill="#FFFFFF"
+                      fill={contrast ? '#FFFFFF' : colors.textDark}
                       translateX={28 * j}
                     />
                   ))}
@@ -134,8 +146,18 @@ const TicketScreen = ({navigation}) => {
               </Svg>
 
               <View style={styles.seatDetails}>
-                <Field type="seats" head="AUDI" text={item.screen} />
-                <Field type="seats" head="SEATS" text={item.seats} />
+                <Field
+                  type="seats"
+                  head="AUDI"
+                  text={item.screen}
+                  color={contrast ? colors.text : colors.textDark}
+                />
+                <Field
+                  type="seats"
+                  head="SEATS"
+                  text={item.seats}
+                  color={contrast ? colors.text : colors.textDark}
+                />
               </View>
             </View>
           </View>
@@ -145,7 +167,6 @@ const TicketScreen = ({navigation}) => {
   };
 
   const onRefresh = () => {
-    console.log('WORKING');
     setRefreshing(true);
     dispatch(refreshTickets);
     setRefreshing(false);
@@ -172,7 +193,6 @@ const TicketScreen = ({navigation}) => {
   };
 
   const addTicket = () => {
-    console.log('FORM', form);
     dispatch(addNewMovie(form)).then(value => {
       console.log('VALUEE', value);
     });
@@ -192,23 +212,42 @@ const TicketScreen = ({navigation}) => {
     ({hours, minutes}) => {
       setTimeVisible(false);
       console.log({hours, minutes});
+      let meridian = 'am';
+      let newHours = hours;
+      if (hours > 12 || hours === 0) {
+        meridian = 'pm';
+
+        if (hours > 12) {
+          newHours = hours - 12;
+        }
+        if (newHours < 10) {
+          newHours = `0${newHours}`;
+        }
+      }
+      const formatTime = `${newHours}:${minutes}${meridian}`;
+      onValueChange('time', formatTime);
     },
     [setTimeVisible],
   );
 
   const [dateVisible, setDateVisible] = useState(false);
+  const [dateValue, setDateValue] = useState(null);
   const onDateDismiss = useCallback(() => {
     setDateVisible(false);
   }, [setDateVisible]);
 
   const onDateConfirm = useCallback(
     params => {
+      console.log('DATE', params.date);
+      setDateValue(params.date);
       setDateVisible(false);
       const newDate = moment(params.date).format('ddd, D MMM, YYYY');
       onValueChange('date', newDate);
     },
     [setDateVisible],
   );
+
+  const {colors} = useTheme();
 
   const addNewMovieModal = () => {
     return (
@@ -219,28 +258,34 @@ const TicketScreen = ({navigation}) => {
         onRequestClose={() => {
           setModalVisible(!modalVisible);
         }}>
-        <View style={[styles.container, {backgroundColor: 'rgba(0,0,0,0.8)'}]}>
+        <View style={[styles.container, {backgroundColor: 'rgba(0,0,0,0.4)'}]}>
           <View
             style={{
-              width: '80%',
+              width: '90%',
               height: '80%',
-              backgroundColor: 'white',
+              backgroundColor: colors.card,
               borderRadius: 30,
               padding: 16,
+              justifyContent: 'space-evenly',
             }}>
-            <TouchableOpacity
-              onPress={closeModal}
+            <View
               style={{
-                borderWidth: 1,
-                borderColor: '#000',
-                height: 32,
-                width: 32,
-                borderRadius: 64,
-                justifyContent: 'center',
+                flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <Icon name="close" size={20} color="#000" />
-            </TouchableOpacity>
+              <View style={{flex: 1}}>
+                <IconButton icon="close" onPress={closeModal} />
+              </View>
+              <View
+                style={{
+                  flex: 3,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text variant="titleLarge">Add New Ticket</Text>
+              </View>
+              <View style={{flex: 1}} />
+            </View>
             <View style={{justifyContent: 'center', alignItems: 'center'}}>
               <TextInput
                 mode="outlined"
@@ -278,7 +323,7 @@ const TicketScreen = ({navigation}) => {
                 visible={dateVisible}
                 onDismiss={onDateDismiss}
                 onConfirm={onDateConfirm}
-                date={form.date}
+                date={dateValue}
               />
               <Pressable
                 onPress={() => setTimeVisible(true)}
@@ -332,7 +377,9 @@ const TicketScreen = ({navigation}) => {
                 value={form.seats}
               />
             </View>
-            <Button title="SUBMIT" onPress={addTicket} />
+            <Button mode="contained" onPress={addTicket}>
+              Submit
+            </Button>
           </View>
           {/* <Text color= 'red'>SOMEETHING</Text> */}
         </View>
@@ -356,43 +403,8 @@ const TicketScreen = ({navigation}) => {
             alignItems: 'center',
             paddingHorizontal: 12,
           }}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{
-              // backgroundColor: 'rgba(0,0,0,0.4)',
-              borderWidth: 1.5,
-              borderColor: 'rgba(255, 255, 255, 0.7)',
-              height: 40,
-              width: 40,
-              borderRadius: 80,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Icon
-              // name="angle-left"
-              name="chevron-left"
-              size={30}
-              color="rgba(255, 255, 255, 0.7)"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              // backgroundColor: 'rgba(0,0,0,0.4)',
-              borderWidth: 1.5,
-              borderColor: 'rgba(255, 255, 255, 0.7)',
-              height: 40,
-              width: 40,
-              borderRadius: 80,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Icon
-              name="add"
-              onPress={() => setModalVisible(true)}
-              size={30}
-              color="rgba(255, 255, 255, 0.7)"
-            />
-          </TouchableOpacity>
+          <IconButton onPress={() => navigation.goBack()} icon="chevron-left" />
+          <IconButton onPress={() => setModalVisible(true)} icon="add" />
         </View>
         {tickets.length !== 0 && tes ? (
           <>
@@ -455,7 +467,6 @@ const TicketScreen = ({navigation}) => {
   );
 };
 
-// define your styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -537,5 +548,4 @@ const styles = StyleSheet.create({
   },
 });
 
-//make this component available to the app
 export default TicketScreen;

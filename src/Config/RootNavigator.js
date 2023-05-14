@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-import {View, Text} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import LoggedInNavigator from './LoggedInNavigation';

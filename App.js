@@ -8,7 +8,6 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import LoginScreen from './src/Screens/LoginScreen';
 import TicketScreen from './src/Screens/TicketsScreen';
 import {Provider} from 'react-redux';
 import {store, persistor} from './src/Store/store';
@@ -24,17 +23,6 @@ function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SplashScreen />
-        {/* <PaperProvider>
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName="Onboarding"
-              screenOptions={{headerShown: false}}>
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="Ticket" component={TicketScreen} />
-              <Stack.Screen name="Onboarding" component={OnBoardingScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </PaperProvider> */}
       </PersistGate>
     </Provider>
   );

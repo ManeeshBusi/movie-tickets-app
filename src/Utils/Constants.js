@@ -1,8 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-bitwise */
+export const API_URL = 'http://10.0.2.2:3000';
 export const API_KEY = 'b36be16db427f6f84a8c93802b633757';
 export const poster_path = 'https://image.tmdb.org/t/p/w500';
 export const bg_path = 'https://image.tmdb.org/t/p/w1920_and_h800_multi_faces';
+export const SEARCH_URL =
+  'https://api.themoviedb.org/3/search/movie?api_key=b36be16db427f6f84a8c93802b633757&query=';
 
 export const rgbConverter = hex => {
   hex = hex.slice(1, hex.length);
@@ -15,6 +18,23 @@ export const rgbConverter = hex => {
 
 export const opacityConverter = color => {
   return color.substr(0, color.length - 5) + '0.4)';
+};
+
+export const rgbSplitter = color => {
+  const rgb = color.split('(')[1].split(', ');
+  return [parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2])];
+};
+
+export const contrastCalc = (c1, c2) => {
+  const bgColor = rgbSplitter(c1);
+  const textColor = rgbSplitter(rgbConverter(c2));
+
+  let contrast = 0;
+  for (var i = 0; i < 3; i++) {
+    contrast = contrast + Math.abs(bgColor[i] - textColor[i]);
+  }
+
+  return contrast > 500;
 };
 
 export const moviesData = [

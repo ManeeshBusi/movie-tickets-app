@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import {API_URL, signOut} from '../Utils/api';
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {API_URL} from '../Utils/Constants';
 
 const WEB_CLIENT_ID =
   '698219637049-d721l5562v817a89tv40q9f5n5rkmcsc.apps.googleusercontent.com';
@@ -26,6 +26,8 @@ const initialState = {
   fetchingToken: false,
   fetchedMessages: false,
   isLoggedIn: false,
+  watchlist: [],
+  favorite: [],
 };
 
 async function apiLogin(userInfo) {
@@ -45,17 +47,6 @@ async function apiLogin(userInfo) {
     console.log('ERROR LOGIN', e);
   }
 }
-
-// async function fetchTicketWithToken(userId) {
-//   var res = await fetch(`${API_URL}/tickets/${userId}`).then(data =>
-//     data.json(),
-//   );
-//   // if (res.code === 401) {
-//   //   return res;
-//   // }
-
-//   return res;
-// }
 
 export const getTickets = createAsyncThunk(
   'user/getTickets',
@@ -79,9 +70,9 @@ export const refreshTickets = createAsyncThunk(
   async (args, thunkAPI) => {
     const state = thunkAPI.getState();
     console.log('REFRESH STATE', state);
-    let res = await fetch(`${API_URL}/gmail/latest/${state.user._id}`);
+    let res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
     console.log('REFRESH CODE', res.status);
-    if (res.status == 200) {
+    if (res.status === 200) {
       return true;
     } else {
       console.log('YEP ', state.user);
@@ -93,7 +84,7 @@ export const refreshTickets = createAsyncThunk(
       await apiLogin({email, name, picture, accessToken});
       console.log('YEP 3');
       res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
-      if (res.code == 200) {
+      if (res.code === 200) {
         return true;
       }
     }
@@ -127,6 +118,7 @@ export const signInWithGoogle = createAsyncThunk(
       return userDetails;
     } catch (e) {
       console.log('ERRRRR LOGGGG', e);
+      return thunkAPI.rejectWithValue(e);
     }
   },
 );
@@ -135,16 +127,16 @@ export const signOutGoogle = createAsyncThunk(
   'user/signOutGoogle',
   async thunkAPI => {
     try {
-      await signOut();
+      await GoogleSignin.signOut();
     } catch (e) {
-      console.log('Errpr signing out', e);
+      console.log('Error signing out', e);
     }
   },
 );
 
 export const signInAgain = createAsyncThunk(
   'user/signInAgain',
-  async thunkAPI => {
+  async (args, thunkAPI) => {
     try {
       const currentUser = await GoogleSignin.getCurrentUser();
       const {name, photo: picture, email} = currentUser.user;
@@ -154,7 +146,9 @@ export const signInAgain = createAsyncThunk(
 
       return userDetails;
     } catch (e) {
-      console.log('ERRRR LOG', e);
+      throw new Error('Login Error');
+      // console.log('ERRRR LOG', e);
+      // return thunkAPI.rejectWithValue(e);
     }
   },
 );
@@ -166,10 +160,82 @@ export const addNewMovie = createAsyncThunk(
       const movieDetails = args;
       const state = thunkAPI.getState();
       console.log('ADDED MOVIE', movieDetails);
-      let res = await fetch(`${API_URL}/tickets/add/${state.user?._id}`);
-      return movieDetails;
+      let res = await fetch(`${API_URL}/tickets/add/${state.user?._id}`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(movieDetails),
+      }).then(data => data.json());
+      console.log('NEWLY ADDED', res);
+      return res;
     } catch (e) {
       console.log('Error LOG', e);
+    }
+  },
+);
+
+export const getMovieList = createAsyncThunk(
+  'user/getMovieList',
+  async (args, thunkAPI) => {
+    try {
+      const type = args;
+      const state = thunkAPI.getState();
+      const res = await fetch(
+        `${API_URL}/movies/${type}/${state.user?._id}`,
+      ).then(data => data.json());
+      return {type: type, list: res[type]};
+    } catch (e) {
+      console.log('Error list', e);
+    }
+  },
+);
+
+export const likeMovie = createAsyncThunk(
+  'user/likeMovie',
+  async (args, thunkAPI) => {
+    try {
+      const {type, like, movie} = args;
+      const state = thunkAPI.getState();
+
+      const res = await fetch(
+        `${API_URL}/movies/${like}/${type}/${state.user?._id}`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({movieId: movie}),
+        },
+      ).then(data => data.json());
+      console.log('MOVIE RESPONSE', res);
+      return {type, like, movie: res.movie};
+    } catch (e) {
+      console.log('Error adding to list', e);
+    }
+  },
+);
+
+export const changeBackground = createAsyncThunk(
+  'user/changeBackground',
+  async (args, thunkAPI) => {
+    try {
+      const background = args;
+      const state = thunkAPI.getState();
+
+      const res = await fetch(`${API_URL}/auth/background/${state.user?._id}`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({background}),
+      }).then(data => data.json());
+      return {background};
+    } catch (e) {
+      console.log('Error adding background', e);
     }
   },
 );
@@ -179,7 +245,6 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      console.log('ACT', action.payload);
       state.user = action.payload;
     },
     getToken: (state, action) => {
@@ -193,15 +258,16 @@ export const userSlice = createSlice({
       })
       .addCase(getTickets.fulfilled, (state, action) => {
         state.fetchingTickets = false;
-        if (action.payload.length !== 0) {
-          state.tickets = action.payload;
-        }
+        // if (action.payload.length !== 0) {
+        state.tickets = action.payload;
+        // }
       })
       .addCase(getTickets.rejected, state => {
         state.fetchingTickets = false;
       })
       .addCase(signInWithGoogle.pending, state => {
         state.fetchingToken = true;
+        state.isLoggedIn = false;
       })
       .addCase(signInWithGoogle.fulfilled, (state, action) => {
         state.fetchingToken = false;
@@ -210,6 +276,7 @@ export const userSlice = createSlice({
       })
       .addCase(signInWithGoogle.rejected, state => {
         state.fetchingToken = false;
+        state.isLoggedIn = false;
       })
       .addCase(signInAgain.pending, state => {
         state.fetchingToken = true;
@@ -228,7 +295,29 @@ export const userSlice = createSlice({
         state.tickets.push(action.payload);
       })
       .addCase(signOutGoogle.fulfilled, state => {
-        state.isLoggedIn = false;
+        return {...initialState};
+      })
+      .addCase(getMovieList.fulfilled, (state, action) => {
+        // state.fetchingTickets = false;
+        const {type, list} = action.payload;
+        state[type] = list;
+      })
+      .addCase(likeMovie.fulfilled, (state, action) => {
+        const {type, like, movie} = action.payload;
+        if (like === 'add') {
+          state[type].push(movie);
+        } else {
+          const newArr = state[type].filter(obj => obj._id !== movie._id);
+          if (type === 'favorite') {
+            return {...state, favorite: newArr};
+          } else {
+            return {...state, watchlist: newArr};
+          }
+        }
+      })
+      .addCase(changeBackground.fulfilled, (state, action) => {
+        const {background} = action.payload;
+        state.user.background = background;
       });
   },
 });

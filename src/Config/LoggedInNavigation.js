@@ -1,19 +1,126 @@
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable prettier/prettier */
 import {View, Text} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import TicketScreen from '../Screens/TicketsScreen';
 import Home from '../Screens/HomeScreen';
+import MovieScreen from '../Screens/MovieScreen';
+import {BottomNavigation, useTheme} from 'react-native-paper';
+import {CommonActions} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import SearchScreen from '../Screens/SearchScreen';
+import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
+import UserScreen from '../Screens/UserScreen';
+import UserBg from '../Screens/UserBgScreen';
+import ListScreen from '../Screens/ListScreen';
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const LandingTabs = () => {
+  const {colors} = useTheme();
+  return (
+    <Tab.Navigator
+      screenOptions={{headerShown: false}}
+      tabBar={({navigation, state, descriptors, insets}) => {
+        return (
+          <BottomNavigation.Bar
+            style={{
+              height: 60,
+              backgroundColor: colors.card,
+            }}
+            activeColor={colors.background}
+            navigationState={state}
+            safeAreaInsets={insets}
+            onTabPress={({route, preventDefault}) => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
+
+              if (event.defaultPrevented) {
+                preventDefault();
+              } else {
+                navigation.dispatch({
+                  ...CommonActions.navigate(route.name, route.params),
+                  target: state.key,
+                });
+              }
+            }}
+            renderIcon={({route, focused, color}) => {
+              const {options} = descriptors[route.key];
+              if (options.tabBarIcon) {
+                return options.tabBarIcon({focused, color, size: 24});
+              }
+
+              return null;
+            }}
+            // getLabelText={({route}) => {
+            //   const {options} = descriptors[route.key];
+            //   const label =
+            //     options.tabBarLabel !== undefined
+            //       ? options.tabBarLabel
+            //       : options.title !== undefined
+            //       ? options.title
+            //       : route.title;
+
+            //   return label;
+            // }}
+          />
+        );
+      }}>
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({color, size}) => {
+            return <Icon name="home" size={size} color={color} />;
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={SearchScreen}
+        options={{
+          tabBarLabel: 'Search',
+          tabBarIcon: ({color, size}) => {
+            return <Icon name="search" size={size} color={color} />;
+          },
+        }}
+      />
+      <Tab.Screen
+        name="User"
+        component={UserScreen}
+        options={{
+          tabBarLabel: 'Me',
+          tabBarIcon: ({color, size}) => {
+            return <Icon name="person" size={size} color={color} />;
+          },
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 export default function LoggedInNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName="Landing"
       screenOptions={{headerShown: false}}>
+      <Stack.Screen
+        name="Landing"
+        component={LandingTabs}
+        options={{headerShown: false}}
+      />
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Tickets" component={TicketScreen} />
+      <Stack.Screen name="Movie" component={MovieScreen} />
+      <Stack.Screen name="Background" component={UserBg} />
+      <Stack.Screen name="Lists" component={ListScreen} />
     </Stack.Navigator>
   );
 }

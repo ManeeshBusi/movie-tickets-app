@@ -1,33 +1,36 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
-//import liraries
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Text from '../Utils/Text';
 
-// create a component
 const Field = props => {
-  const {icon, head, text, type} = props;
+  const {icon, head, text, type, flex, color} = props;
   const isSeat = type === 'seats';
-
   return (
-    <View style={isSeat ? styles.seatContainer : styles.container}>
+    <View
+      style={isSeat ? styles.seatContainer : [styles.container, {flex: flex}]}>
       {isSeat ? (
-        <Text fz={16}>{head}</Text>
+        <Text color={color} variant="bodyLarge">
+          {head}
+        </Text>
       ) : (
-        <Icon name={icon} size={16} color="#FFF" style={{marginRight: 4}} />
+        <Icon name={icon} size={16} color={color} style={{marginRight: 4}} />
       )}
-      <Text fz={isSeat ? 24 : 12}>{text}</Text>
+      <Text color={color} variant={isSeat ? 'bodyExtraLarge' : 'bodySmall'}>
+        {text}
+      </Text>
     </View>
   );
 };
 
-// define your styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
+    // marginHorizontal: 4,
+    marginBottom: 2,
   },
   seatContainer: {
     justifyContent: 'center',
@@ -35,5 +38,4 @@ const styles = StyleSheet.create({
   },
 });
 
-//make this component available to the app
 export default Field;
