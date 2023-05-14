@@ -8,8 +8,9 @@ import {useSelector} from 'react-redux';
 import {theme} from '../Utils/Theme';
 
 export default function SplashScreen() {
-  const {isLoggedIn} = useSelector(state => state);
-  const RootNavigator = CreateRootNavigator(isLoggedIn);
+  const states = useSelector(state => state.user);
+  console.log('SS', states);
+  const RootNavigator = CreateRootNavigator(states.isLoggedIn);
   return (
     <PaperProvider theme={theme}>
       <>

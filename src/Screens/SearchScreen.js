@@ -23,8 +23,10 @@ const SearchScreen = ({navigation}) => {
       data.json(),
     );
 
-    setResults(prev => [...prev, ...res.results]);
-    setLoading(false);
+    setTimeout(() => {
+      setResults(prev => [...prev, ...res.results]);
+      setLoading(false);
+    }, 2000);
   };
 
   useEffect(() => {

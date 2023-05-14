@@ -2,7 +2,6 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_URL} from '../Utils/Constants';
 
 const WEB_CLIENT_ID =
@@ -51,13 +50,11 @@ async function apiLogin(userInfo) {
 export const getTickets = createAsyncThunk(
   'user/getTickets',
   async (args, thunkAPI) => {
-    const state = thunkAPI.getState();
-    // let res = await fetchTicketWithToken(state?.user?._id);
+    const {user} = thunkAPI.getState();
     try {
-      let res = await fetch(`${API_URL}/tickets/${state.user._id}`).then(data =>
+      let res = await fetch(`${API_URL}/tickets/${user.user._id}`).then(data =>
         data.json(),
       );
-      console.log('TICKETS REDUX', res);
       return res;
     } catch (e) {
       console.log('Error getting tickets', e);
@@ -68,22 +65,22 @@ export const getTickets = createAsyncThunk(
 export const refreshTickets = createAsyncThunk(
   'user/refreshTickets',
   async (args, thunkAPI) => {
-    const state = thunkAPI.getState();
-    console.log('REFRESH STATE', state);
-    let res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
+    const {user} = thunkAPI.getState();
+    console.log('REFRESH STATE', user);
+    let res = await fetch(`${API_URL}/gmail/messages/${user.user._id}`);
     console.log('REFRESH CODE', res.status);
     if (res.status === 200) {
       return true;
     } else {
-      console.log('YEP ', state.user);
-      const {email, name, picture} = state.user;
-      await GoogleSignin.clearCachedAccessToken(state.user.accessToken);
+      console.log('YEP ', user);
+      const {email, name, picture} = user;
+      await GoogleSignin.clearCachedAccessToken(user.user.accessToken);
       console.log('YEP 2');
       const {accessToken} = await GoogleSignin.getTokens();
-      state.user.accessToken = accessToken;
+      user.user.accessToken = accessToken;
       await apiLogin({email, name, picture, accessToken});
       console.log('YEP 3');
-      res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
+      res = await fetch(`${API_URL}/gmail/messages/${user.user._id}`);
       if (res.code === 200) {
         return true;
       }
@@ -112,7 +109,6 @@ export const signInWithGoogle = createAsyncThunk(
 
       const {email, name, picture} = userAv;
       const {accessToken} = await GoogleSignin.getTokens();
-      // console.log('HERE 3');
       const userDetails = await apiLogin({email, name, picture, accessToken});
 
       return userDetails;
@@ -158,9 +154,9 @@ export const addNewMovie = createAsyncThunk(
   async (args, thunkAPI) => {
     try {
       const movieDetails = args;
-      const state = thunkAPI.getState();
+      const {user} = thunkAPI.getState();
       console.log('ADDED MOVIE', movieDetails);
-      let res = await fetch(`${API_URL}/tickets/add/${state.user?._id}`, {
+      let res = await fetch(`${API_URL}/tickets/add/${user.user?._id}`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -181,9 +177,9 @@ export const getMovieList = createAsyncThunk(
   async (args, thunkAPI) => {
     try {
       const type = args;
-      const state = thunkAPI.getState();
+      const {user} = thunkAPI.getState();
       const res = await fetch(
-        `${API_URL}/movies/${type}/${state.user?._id}`,
+        `${API_URL}/movies/${type}/${user.user?._id}`,
       ).then(data => data.json());
       return {type: type, list: res[type]};
     } catch (e) {
@@ -197,10 +193,10 @@ export const likeMovie = createAsyncThunk(
   async (args, thunkAPI) => {
     try {
       const {type, like, movie} = args;
-      const state = thunkAPI.getState();
+      const {user} = thunkAPI.getState();
 
       const res = await fetch(
-        `${API_URL}/movies/${like}/${type}/${state.user?._id}`,
+        `${API_URL}/movies/${like}/${type}/${user.user?._id}`,
         {
           method: 'POST',
           headers: {
@@ -223,9 +219,9 @@ export const changeBackground = createAsyncThunk(
   async (args, thunkAPI) => {
     try {
       const background = args;
-      const state = thunkAPI.getState();
+      const {user} = thunkAPI.getState();
 
-      const res = await fetch(`${API_URL}/auth/background/${state.user?._id}`, {
+      const res = await fetch(`${API_URL}/auth/background/${user.user?._id}`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',

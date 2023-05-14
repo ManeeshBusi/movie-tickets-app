@@ -17,6 +17,7 @@ import FastImage from 'react-native-fast-image';
 import {useDispatch, useSelector} from 'react-redux';
 import {likeMovie} from '../Store/userSlice';
 import {poster_path, bg_path} from '../Utils/Constants';
+import Loading from '../Components/Loading.component';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
@@ -29,7 +30,7 @@ const MovieScreen = ({route, navigation}) => {
   const [streaming, setStreaming] = useState(null);
   const [fetchingMovie, setFetching] = useState(movieId ? true : false);
 
-  const {favorite, watchlist} = useSelector(state => state);
+  const {favorite, watchlist} = useSelector(state => state.user);
 
   const [isLiked, setIsLiked] = useState(
     favorite.some(fav => fav._id.includes(movieDetails?._id)) ?? false,
@@ -64,15 +65,17 @@ const MovieScreen = ({route, navigation}) => {
       title,
       tmdbId,
     };
-    console.log('RESPONSE', tmdbId);
+
     if (res.belongs_to_collection) {
       const {id, name} = res.belongs_to_collection;
       movieParams.series = {id, name};
     }
-
-    movieParams.language = res.spoken_languages
-      ? res.spoken_languages[0].english_name
-      : null;
+    console.log('PARAMS', res);
+    console.log('LALALALA', res.spoken_languages);
+    movieParams.language =
+      res.spoken_languages.length !== 0
+        ? res.spoken_languages[0].english_name
+        : null;
 
     setMovie(movieParams);
     setFetching(false);
@@ -136,11 +139,7 @@ const MovieScreen = ({route, navigation}) => {
   };
 
   if (fetchingMovie) {
-    return (
-      <View>
-        <Text>NOTHING</Text>
-      </View>
-    );
+    return <Loading loading={fetchingMovie} />;
   } else {
     return (
       <>

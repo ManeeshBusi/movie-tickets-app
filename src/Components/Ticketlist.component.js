@@ -8,7 +8,7 @@ import FastImage from 'react-native-fast-image';
 import EmptyContainer from './EmptyContainer.component';
 
 const Ticketlist = ({navigation}) => {
-  const {tickets} = useSelector(state => state);
+  const {tickets} = useSelector(state => state.user);
   const renderItem = ({item, index}) => {
     let customMargin = {};
     if (index === 0) {

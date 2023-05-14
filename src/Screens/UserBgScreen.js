@@ -31,7 +31,11 @@ const UserBg = ({navigation}) => {
   }, [page]);
 
   const renderFooter = () => {
-    return <View>{loading && <Text>Loading backgorunds</Text>}</View>;
+    return (
+      <View style={styles.footer}>
+        {loading && <Text>Loading backgorunds</Text>}
+      </View>
+    );
   };
 
   return (
@@ -47,7 +51,10 @@ const UserBg = ({navigation}) => {
             return (
               <Pressable
                 onPress={() => dispatch(changeBackground(item.bg))}
-                style={styles.itemContainer}>
+                style={({pressed}) => [
+                  styles.itemContainer,
+                  {transform: [{scale: pressed ? 1.1 : 1}]},
+                ]}>
                 <FastImage
                   style={styles.image}
                   source={{
@@ -85,7 +92,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   image: {
-    width: 360,
+    width: 340,
     height: undefined,
     aspectRatio: 12 / 6,
     borderRadius: 28,
@@ -96,6 +103,11 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.95,
     shadowRadius: 20.0,
+  },
+  footer: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

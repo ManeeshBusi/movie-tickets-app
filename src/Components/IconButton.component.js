@@ -9,7 +9,13 @@ const IconButton = ({onPress, icon, color}) => {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.container, {backgroundColor: colors.background}]}>
+      style={({pressed}) => [
+        styles.container,
+        {
+          backgroundColor: colors.background,
+          transform: [{scale: pressed ? 1.1 : 1}],
+        },
+      ]}>
       <Icon name={icon} size={25} color={colors.primary} />
     </Pressable>
   );

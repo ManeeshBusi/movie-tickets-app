@@ -26,6 +26,7 @@ import {TimePickerModal, DatePickerModal} from 'react-native-paper-dates';
 import {TextInput, useTheme, Button} from 'react-native-paper';
 import moment from 'moment';
 import IconButton from '../Components/IconButton.component';
+import Loading from '../Components/Loading.component';
 
 const {width} = Dimensions.get('window');
 const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
@@ -36,9 +37,9 @@ const ITEM_HEIGHT = 423;
 const TicketScreen = ({navigation}) => {
   const dispatch = useDispatch();
   // eslint-disable-next-line no-unused-vars
-  const {tickets, user, fetchedMessages} = useSelector(state => state);
+  const {tickets, user, fetchedMessages} = useSelector(state => state.user);
   const [refreshing, setRefreshing] = useState(false);
-  const [tes, setTes] = useState(false);
+  const [imgLoading, setImgLoading] = useState(true);
 
   const scrollX = useRef(new Animated.Value(0)).current;
   const dashes = new Array(Math.floor(ITEM_WIDTH / 16)).fill(null);
@@ -47,7 +48,7 @@ const TicketScreen = ({navigation}) => {
 
   useEffect(() => {
     dispatch(getTickets()).then(() => {
-      setTes(true);
+      setImgLoading(false);
     });
   }, [dispatch, fetchedMessages]);
 
@@ -387,84 +388,90 @@ const TicketScreen = ({navigation}) => {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <KeyboardAvoidingView>
-        <StatusBar translucent backgroundColor="transparent" />
-        <View
-          style={{
-            position: 'absolute',
-            top: 30,
-            height: 42,
-            width: '100%',
-            zIndex: 999,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 12,
-          }}>
-          <IconButton onPress={() => navigation.goBack()} icon="chevron-left" />
-          <IconButton onPress={() => setModalVisible(true)} icon="add" />
-        </View>
-        {tickets.length !== 0 && tes ? (
-          <>
-            <View style={[StyleSheet.absoluteFill]}>
-              {tickets.map((item, index) => {
-                const inputRange = [
-                  (index - 1) * ITEM_SIZE,
-                  index * ITEM_SIZE,
-                  (index + 1) * ITEM_SIZE,
-                ];
-                const opacity = scrollX.interpolate({
-                  inputRange,
-                  outputRange: [0, 1, 0],
-                });
-
-                return (
-                  <AnimatedFastImage
-                    key={item._id}
-                    source={{uri: item.movieId.bg}}
-                    style={[StyleSheet.absoluteFill, {opacity}]}
-                  />
-                );
-              })}
-              <View style={[styles.overlay, StyleSheet.absoluteFillObject]} />
-            </View>
-
-            <Animated.FlatList
-              data={[{_id: 'left'}, ...tickets, {_id: 'right'}]}
-              horizontal
-              decelerationRate={0}
-              keyExtractor={(item, index) => {
-                return item._id;
-              }}
-              snapToInterval={ITEM_SIZE}
-              showsHorizontalScrollIndicator={false}
-              onScroll={Animated.event(
-                [{nativeEvent: {contentOffset: {x: scrollX}}}],
-                {useNativeDriver: true},
-              )}
-              scrollEventThrottle={16}
-              renderItem={renderItem}
-              removeClippedSubviews={true}
-              initialNumToRender={3}
-              maxToRenderPerBatch={4}
-              updateCellsBatchingPeriod={800}
-              windowSize={4}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
+  if (imgLoading) {
+    return <Loading loading={imgLoading} />;
+  } else {
+    return (
+      <View style={styles.container}>
+        <KeyboardAvoidingView>
+          <StatusBar translucent backgroundColor="transparent" />
+          <View
+            style={{
+              position: 'absolute',
+              top: 30,
+              height: 42,
+              width: '100%',
+              zIndex: 999,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingHorizontal: 12,
+            }}>
+            <IconButton
+              onPress={() => navigation.goBack()}
+              icon="chevron-left"
             />
-          </>
-        ) : (
-          <View>
-            <Text>SOMETHING</Text>
+            <IconButton onPress={() => setModalVisible(true)} icon="add" />
           </View>
-        )}
-        {addNewMovieModal()}
-      </KeyboardAvoidingView>
-    </View>
-  );
+          {tickets.length !== 0 && (
+            <>
+              <View style={[StyleSheet.absoluteFill]}>
+                {tickets.map((item, index) => {
+                  const inputRange = [
+                    (index - 1) * ITEM_SIZE,
+                    index * ITEM_SIZE,
+                    (index + 1) * ITEM_SIZE,
+                  ];
+                  const opacity = scrollX.interpolate({
+                    inputRange,
+                    outputRange: [0, 1, 0],
+                  });
+
+                  return (
+                    <AnimatedFastImage
+                      key={item._id}
+                      source={{uri: item.movieId.bg}}
+                      style={[StyleSheet.absoluteFill, {opacity}]}
+                    />
+                  );
+                })}
+                <View style={[styles.overlay, StyleSheet.absoluteFillObject]} />
+              </View>
+
+              <Animated.FlatList
+                data={[{_id: 'left'}, ...tickets, {_id: 'right'}]}
+                horizontal
+                decelerationRate={0}
+                keyExtractor={(item, index) => {
+                  return item._id;
+                }}
+                snapToInterval={ITEM_SIZE}
+                showsHorizontalScrollIndicator={false}
+                onScroll={Animated.event(
+                  [{nativeEvent: {contentOffset: {x: scrollX}}}],
+                  {useNativeDriver: true},
+                )}
+                scrollEventThrottle={16}
+                renderItem={renderItem}
+                removeClippedSubviews={true}
+                // initialNumToRender={3}
+                // maxToRenderPerBatch={4}
+                // updateCellsBatchingPeriod={800}
+                // windowSize={4}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
+              />
+            </>
+          )}
+          {addNewMovieModal()}
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -539,12 +546,8 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   input: {
-    // height: 40,
     width: '95%',
     marginVertical: 6,
-    // margin: 12,
-    // borderWidth: 1,
-    // padding: 10,
   },
 });
 

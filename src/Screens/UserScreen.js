@@ -10,7 +10,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const UserScreen = ({navigation}) => {
   const {colors} = useTheme();
-  const {user} = useSelector(state => state);
+  const {user} = useSelector(state => state.user);
   const dispatch = useDispatch();
 
   const refreshMovieTickets = () => {
