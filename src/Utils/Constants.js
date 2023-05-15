@@ -23,6 +23,7 @@ export const opacityConverter = color => {
 
 export const rgbSplitter = color => {
   const rgb = color.split('(')[1].split(', ');
+  // eslint-disable-next-line radix
   return [parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2])];
 };
 

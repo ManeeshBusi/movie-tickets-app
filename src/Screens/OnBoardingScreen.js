@@ -16,7 +16,7 @@ import {useTheme} from 'react-native-paper';
 import Text from '../Utils/Text';
 import IconButton from '../Components/IconButton.component';
 
-const {width: PAGE_WIDTH, height: PAGE_HEIGHT} = Dimensions.get('window');
+const {width: PAGE_WIDTH} = Dimensions.get('window');
 
 export default function OnBoardingScreen() {
   const dispatch = useDispatch();
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   heading: {justifyContent: 'center', alignItems: 'center'},
   overlay: {
     width: PAGE_WIDTH,
-    height: PAGE_HEIGHT,
+    height: '100%',
     position: 'absolute',
     backgroundColor: 'black',
     opacity: 0.4,

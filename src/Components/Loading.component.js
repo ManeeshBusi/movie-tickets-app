@@ -1,10 +1,8 @@
 /* eslint-disable prettier/prettier */
-//import liraries
-import React, {Component} from 'react';
+import React from 'react';
 import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import {useTheme} from 'react-native-paper';
 
-// create a component
 const Loading = ({loading}) => {
   const {colors} = useTheme();
   return (
@@ -23,7 +21,6 @@ const Loading = ({loading}) => {
   );
 };
 
-// define your styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -32,5 +29,4 @@ const styles = StyleSheet.create({
   },
 });
 
-//make this component available to the app
 export default Loading;
