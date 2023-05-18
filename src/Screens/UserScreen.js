@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, StyleSheet, Pressable} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {useTheme} from 'react-native-paper';
@@ -7,11 +7,18 @@ import {useDispatch, useSelector} from 'react-redux';
 import {refreshTickets, signOutGoogle} from '../Store/userSlice';
 import Text from '../Utils/Text';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {getMovieLists, getTicket} from '../Store/movieSlice';
 
 const UserScreen = ({navigation}) => {
   const {colors} = useTheme();
   const {user} = useSelector(state => state.user);
   const dispatch = useDispatch();
+
+  const movState = useSelector(state => state.movie);
+
+  useEffect(() => {
+    dispatch(getMovieLists('watchlist'));
+  }, []);
 
   const refreshMovieTickets = () => {
     dispatch(refreshTickets());

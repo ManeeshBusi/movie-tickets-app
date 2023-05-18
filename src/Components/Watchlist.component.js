@@ -17,7 +17,7 @@ const Watchlist = ({navigation, type, list}) => {
     return (
       <TouchableOpacity
         style={[customMargin, styles.itemContainer]}
-        onPress={() => navigation.navigate('Movie', {movie: item})}>
+        onPress={() => navigation.navigate('Movie', {movieId: item.tmdbId})}>
         <FastImage
           style={styles.image}
           source={{

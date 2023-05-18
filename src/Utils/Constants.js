@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-bitwise */
-// export const API_URL = 'http://10.0.2.2:3000';
-export const API_URL = 'https://showtime-api-service.onrender.com';
+export const API_URL = 'http://10.0.2.2:3000';
+// export const API_URL = 'https://showtime-api-service.onrender.com';
 export const API_KEY = 'b36be16db427f6f84a8c93802b633757';
 export const poster_path = 'https://image.tmdb.org/t/p/w500';
 export const bg_path = 'https://image.tmdb.org/t/p/w1920_and_h800_multi_faces';

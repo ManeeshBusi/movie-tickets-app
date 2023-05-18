@@ -16,7 +16,7 @@ const Ticketlist = ({navigation}) => {
     } else {
       customMargin.marginHorizontal = 8;
     }
-
+    // console.log('TIIIII', tickets);
     return (
       <View style={[customMargin, styles.itemContainer]}>
         <FastImage style={styles.image} source={{uri: item.movieId.bg}} />
@@ -32,9 +32,9 @@ const Ticketlist = ({navigation}) => {
           View All
         </Button>
       </View>
-      {tickets.length !== 0 ? (
+      {tickets?.length !== 0 ? (
         <FlatList
-          data={tickets.slice(0, 8)}
+          data={tickets?.slice(0, 8)}
           horizontal
           keyExtractor={(item, index) => {
             return item._id;

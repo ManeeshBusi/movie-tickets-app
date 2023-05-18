@@ -27,6 +27,7 @@ import {TextInput, useTheme, Button} from 'react-native-paper';
 import moment from 'moment';
 import IconButton from '../Components/IconButton.component';
 import Loading from '../Components/Loading.component';
+import { selectTickets, setCurrentPage } from '../Store/movieSlice';
 
 const {width} = Dimensions.get('window');
 const AnimatedFastImage = Animated.createAnimatedComponent(FastImage);
@@ -37,7 +38,8 @@ const ITEM_HEIGHT = 423;
 const TicketScreen = ({navigation}) => {
   const dispatch = useDispatch();
   // eslint-disable-next-line no-unused-vars
-  const {tickets, user, fetchedMessages} = useSelector(state => state.user);
+  const {user, fetchedMessages} = useSelector(state => state.user);
+  const {tickets, paginatedTickets} = useSelector(state => state.movie);
   const [refreshing, setRefreshing] = useState(false);
   const [imgLoading, setImgLoading] = useState(true);
 
@@ -47,10 +49,11 @@ const TicketScreen = ({navigation}) => {
   const spacing = (width - ITEM_SIZE) / 2;
 
   useEffect(() => {
-    dispatch(getTickets()).then(() => {
-      setImgLoading(false);
-    });
-  }, [dispatch, fetchedMessages]);
+    // dispatch(getTickets()).then(() => {
+    // });
+    dispatch(selectTickets(1));
+    setImgLoading(false);
+  }, []);
 
   const renderItem = ({item, index}) => {
     const movieDetails = item.movieId;
@@ -388,6 +391,17 @@ const TicketScreen = ({navigation}) => {
     );
   };
 
+
+  const [currPage, setPage] = useState(1);
+  const [totalPages, setTotal] = useState(0);
+  const perPage = 8;
+
+  console.log("PAPAPAPAPAPAPAPAPAPAPAPAPAPAPAPA", paginatedTickets)
+
+  const handleMore = () => {
+    dispatch(selectTickets(currPage + 1));
+  }
+
   if (imgLoading) {
     return <Loading loading={imgLoading} />;
   } else {
@@ -413,7 +427,7 @@ const TicketScreen = ({navigation}) => {
             />
             <IconButton onPress={() => setModalVisible(true)} icon="add" />
           </View>
-          {tickets.length !== 0 && (
+          {tickets?.length !== 0 && (
             <>
               <View style={[StyleSheet.absoluteFill]}>
                 {tickets.map((item, index) => {
@@ -453,7 +467,9 @@ const TicketScreen = ({navigation}) => {
                 )}
                 scrollEventThrottle={16}
                 renderItem={renderItem}
-                removeClippedSubviews={true}
+                onEndReached={handleMore}
+                onEndReachedThreshold={0.1}
+                // removeClippedSubviews={true}
                 // initialNumToRender={3}
                 // maxToRenderPerBatch={4}
                 // updateCellsBatchingPeriod={800}

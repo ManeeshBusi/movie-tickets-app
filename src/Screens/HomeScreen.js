@@ -6,23 +6,22 @@ import Text from '../Utils/Text';
 import {useDispatch, useSelector} from 'react-redux';
 import Watchlist from '../Components/Watchlist.component';
 import Ticketlist from '../Components/Ticketlist.component';
-import {getMovieList, getTickets} from '../Store/userSlice';
-import {testFun} from '../Store/movieSlice';
+import {getTickets} from '../Store/userSlice';
 import Loading from '../Components/Loading.component';
+import {getMovieLists, getTicket} from '../Store/movieSlice';
 
 const Home = props => {
   const {colors} = useTheme();
-  const {user, watchlist, favorite} = useSelector(state => state.user);
+  const {user} = useSelector(state => state.user);
+  const {watchlist, favorite} = useSelector(state => state.movie);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   const onRefresh = async () => {
     setRefreshing(true);
-    dispatch(getTickets());
-    dispatch(getMovieList('favorite'));
-    dispatch(getMovieList('watchlist'));
-    dispatch(testFun());
+    dispatch(getTicket());
+    dispatch(getMovieLists());
     setTimeout(() => {
       setLoading(false);
       setRefreshing(false);

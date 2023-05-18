@@ -50,7 +50,10 @@ const UserBg = ({navigation}) => {
           renderItem={({item, index}) => {
             return (
               <Pressable
-                onPress={() => dispatch(changeBackground(item.bg))}
+                onPress={() => {
+                  dispatch(changeBackground(item.bg));
+                  navigation.goBack();
+                }}
                 style={({pressed}) => [
                   styles.itemContainer,
                   {transform: [{scale: pressed ? 1.1 : 1}]},

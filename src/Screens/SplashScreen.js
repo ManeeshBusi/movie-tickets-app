@@ -9,7 +9,6 @@ import {theme} from '../Utils/Theme';
 
 export default function SplashScreen() {
   const states = useSelector(state => state.user);
-  console.log('SS', states);
   const RootNavigator = CreateRootNavigator(states.isLoggedIn);
   return (
     <PaperProvider theme={theme}>

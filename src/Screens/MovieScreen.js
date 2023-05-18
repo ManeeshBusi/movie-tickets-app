@@ -95,7 +95,7 @@ const MovieScreen = ({route, navigation}) => {
   useEffect(() => {
     const getStream = async () => {
       const stream = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieDetails.tmdbId}/watch/providers?api_key=b36be16db427f6f84a8c93802b633757`,
+        `https://api.themoviedb.org/3/movie/${movieDetails?.tmdbId}/watch/providers?api_key=b36be16db427f6f84a8c93802b633757`,
       ).then(data => data.json());
       if (stream.results?.IN?.flatrate) {
         setStreaming({
@@ -148,7 +148,6 @@ const MovieScreen = ({route, navigation}) => {
             onPress={() => navigation.goBack()}
             icon="chevron-left"
             size={30}
-            // color="rgba(255, 255, 255, 0.7)"
           />
           <IconButton
             icon={isLiked ? 'favorite' : 'favorite-outline'}
