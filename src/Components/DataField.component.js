@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {memo} from 'react';
 import {View, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Text from '../Utils/Text';
 
-const Field = props => {
+const Field = memo(props => {
   const {icon, head, text, type, flex, color} = props;
   const isSeat = type === 'seats';
   return (
@@ -23,7 +23,7 @@ const Field = props => {
       </Text>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

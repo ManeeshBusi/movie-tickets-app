@@ -21,12 +21,8 @@ GoogleSignin.configure({
 const initialState = {
   user: {},
   tickets: [],
-  fetchingTickets: false,
-  fetchingToken: false,
   fetchedMessages: false,
   isLoggedIn: false,
-  watchlist: [],
-  favorite: [],
 };
 
 async function apiLogin(userInfo) {
@@ -46,21 +42,6 @@ async function apiLogin(userInfo) {
     console.log('ERROR LOGIN', e);
   }
 }
-
-export const getTickets = createAsyncThunk(
-  'user/getTickets',
-  async (args, thunkAPI) => {
-    const {user} = thunkAPI.getState();
-    try {
-      let res = await fetch(`${API_URL}/tickets/${user.user._id}`).then(data =>
-        data.json(),
-      );
-      return res;
-    } catch (e) {
-      console.log('Error getting tickets', e);
-    }
-  },
-);
 
 export const refreshTickets = createAsyncThunk(
   'user/refreshTickets',
@@ -149,71 +130,6 @@ export const signInAgain = createAsyncThunk(
   },
 );
 
-export const addNewMovie = createAsyncThunk(
-  'user/addNewMovie',
-  async (args, thunkAPI) => {
-    try {
-      const movieDetails = args;
-      const {user} = thunkAPI.getState();
-      console.log('ADDED MOVIE', movieDetails);
-      let res = await fetch(`${API_URL}/tickets/add/${user.user?._id}`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(movieDetails),
-      }).then(data => data.json());
-      console.log('NEWLY ADDED', res);
-      return res;
-    } catch (e) {
-      console.log('Error LOG', e);
-    }
-  },
-);
-
-export const getMovieList = createAsyncThunk(
-  'user/getMovieList',
-  async (args, thunkAPI) => {
-    try {
-      const type = args;
-      const {user} = thunkAPI.getState();
-      const res = await fetch(
-        `${API_URL}/movies/${type}/${user.user?._id}`,
-      ).then(data => data.json());
-      return {type: type, list: res[type]};
-    } catch (e) {
-      console.log('Error list', e);
-    }
-  },
-);
-
-export const likeMovie = createAsyncThunk(
-  'user/likeMovie',
-  async (args, thunkAPI) => {
-    try {
-      const {type, like, movie} = args;
-      const {user} = thunkAPI.getState();
-
-      const res = await fetch(
-        `${API_URL}/movies/${like}/${type}/${user.user?._id}`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({movieId: movie}),
-        },
-      ).then(data => data.json());
-      console.log('MOVIE RESPONSE', res);
-      return {type, like, movie: res.movie};
-    } catch (e) {
-      console.log('Error adding to list', e);
-    }
-  },
-);
-
 export const changeBackground = createAsyncThunk(
   'user/changeBackground',
   async (args, thunkAPI) => {
@@ -239,28 +155,9 @@ export const changeBackground = createAsyncThunk(
 export const userSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {
-    setUser: (state, action) => {
-      state.user = action.payload;
-    },
-    getToken: (state, action) => {
-      state.user.accessToken = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: builder => {
     builder
-      .addCase(getTickets.pending, state => {
-        state.fetchingTickets = true;
-      })
-      .addCase(getTickets.fulfilled, (state, action) => {
-        state.fetchingTickets = false;
-        // if (action.payload.length !== 0) {
-        state.tickets = action.payload;
-        // }
-      })
-      .addCase(getTickets.rejected, state => {
-        state.fetchingTickets = false;
-      })
       .addCase(signInWithGoogle.pending, state => {
         state.fetchingToken = true;
         state.isLoggedIn = false;
@@ -287,29 +184,8 @@ export const userSlice = createSlice({
       .addCase(refreshTickets.fulfilled, (state, action) => {
         state.fetchedMessages = action.payload;
       })
-      .addCase(addNewMovie.fulfilled, (state, action) => {
-        state.tickets.push(action.payload);
-      })
       .addCase(signOutGoogle.fulfilled, state => {
         return {...initialState};
-      })
-      .addCase(getMovieList.fulfilled, (state, action) => {
-        // state.fetchingTickets = false;
-        const {type, list} = action.payload;
-        state[type] = list;
-      })
-      .addCase(likeMovie.fulfilled, (state, action) => {
-        const {type, like, movie} = action.payload;
-        if (like === 'add') {
-          state[type].push(movie);
-        } else {
-          const newArr = state[type].filter(obj => obj._id !== movie._id);
-          if (type === 'favorite') {
-            return {...state, favorite: newArr};
-          } else {
-            return {...state, watchlist: newArr};
-          }
-        }
       })
       .addCase(changeBackground.fulfilled, (state, action) => {
         const {background} = action.payload;
@@ -317,7 +193,5 @@ export const userSlice = createSlice({
       });
   },
 });
-
-export const {getUser, getToken, setUser} = userSlice.actions;
 
 export const userReducer = userSlice.reducer;

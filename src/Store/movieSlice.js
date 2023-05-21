@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
-import {createAsyncThunk, createSelector, createSlice} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axiosInstance from '../Utils/axiosInstace';
+import {contrastCalc, opacityConverter} from '../Utils/Constants';
+import {theme} from '../Utils/Theme';
 
 const initialState = {
   loading: {
@@ -16,11 +18,8 @@ const initialState = {
     addMovie: null,
   },
   tickets: [],
-  paginatedTickets: [],
   watchlist: [],
   favorite: [],
-  currentPage: 1,
-  perPage: 8,
 };
 
 export const getTicket = createAsyncThunk(
@@ -29,7 +28,7 @@ export const getTicket = createAsyncThunk(
     const state = thunkAPI.getState().user;
     try {
       const res = await axiosInstance.get(`/tickets/${state.user?._id}`);
-      return res.data.slice(0, 9);
+      return res.data;
     } catch (e) {
       console.log('Error getting tickets', e);
       thunkAPI.rejectWithValue({error: e, message: 'Error getting tickets'});
@@ -44,9 +43,8 @@ export const addTicket = createAsyncThunk(
     const state = thunkAPI.getState().user;
     try {
       const res = await axiosInstance
-        .post(`/tickets/add/${state.user?._id}`, JSON.stringify(movieDetails))
-        .then(data => data.json());
-      return res;
+        .post(`/tickets/add/${state.user?._id}`, movieDetails);
+      return res.data;
     } catch (e) {
       console.log('Error adding new ticket', e);
       thunkAPI.rejectWithValue({error: e, message: 'Error adding new ticket.'});
@@ -97,17 +95,7 @@ export const addMovieToList = createAsyncThunk(
 export const movieSlice = createSlice({
   name: 'movie',
   initialState,
-  reducers: {
-    setCurrentPage: (state, action) => {
-      state.currentPage = action.payload;
-    },
-    selectTickets: (state, action) => {
-      const startIndex = (action.payload - 1) * state.perPage;
-      const endIndex = startIndex + state.perPage;
-      console.log("TITITITITIT", state.tickets.slice(startIndex, endIndex))
-      state.paginatedTickets = state.tickets.slice(startIndex, endIndex);
-    },
-  },
+  reducers: {},
   extraReducers: builder => {
     builder
       .addCase(getTicket.pending, state => {
@@ -115,7 +103,15 @@ export const movieSlice = createSlice({
         state.loading.tickets = true;
       })
       .addCase(getTicket.fulfilled, (state, action) => {
-        state.tickets = action.payload;
+        let ticketArr = action.payload;
+        for (var i = 0; i < ticketArr.length; i++) {
+          ticketArr[i].movieId.contrast = contrastCalc(
+            ticketArr[i].movieId.color,
+            theme.colors.text,
+          );
+          ticketArr[i].movieId.mildColor = opacityConverter(ticketArr[i].movieId.color);
+        }
+        state.tickets = ticketArr;
         state.error.tickets = null;
         state.loading.tickets = false;
       })
@@ -128,7 +124,7 @@ export const movieSlice = createSlice({
         state.loading.addTicket = true;
       })
       .addCase(addTicket.fulfilled, (state, action) => {
-        state.tickets = [action.payload, ...state.tickets];
+        state.tickets = [...state.tickets, action.payload[0]];
         state.error.addTicket = null;
         state.loading.addTicket = false;
       })
@@ -176,5 +172,18 @@ export const movieSlice = createSlice({
   },
 });
 
-export const {setCurrentPage, selectTickets} = movieSlice.actions;
+export const selectTickets = state => state.movie.tickets;
+export const selectWatchlist = state => state.movie.watchlist;
+export const selectFavorite = state => state.movie.favorite;
+
+export const selectTicketLoader = state => state.movie.loading.tickets;
+export const selectListLoader = state => state.movie.loading.list;
+export const selectAddTicketLoader = state => state.movie.loading.addTicket;
+export const selectAddMovieLoader = state => state.movie.loading.addMovie;
+
+export const selectTicketError = state => state.movie.error.tickets;
+export const selectListError = state => state.movie.error.list;
+export const selectAddTicketError = state => state.movie.error.addTicket;
+export const selectAddMovieError = state => state.movie.error.addMovie;
+
 export const movieReducer = movieSlice.reducer;

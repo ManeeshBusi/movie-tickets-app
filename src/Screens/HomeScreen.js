@@ -3,25 +3,22 @@ import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, ScrollView, RefreshControl} from 'react-native';
 import {useTheme} from 'react-native-paper';
 import Text from '../Utils/Text';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import Watchlist from '../Components/Watchlist.component';
 import Ticketlist from '../Components/Ticketlist.component';
-import {getTickets} from '../Store/userSlice';
 import Loading from '../Components/Loading.component';
-import {getMovieLists, getTicket} from '../Store/movieSlice';
+import {selectFavorite, selectWatchlist} from '../Store/movieSlice';
 
 const Home = props => {
   const {colors} = useTheme();
   const {user} = useSelector(state => state.user);
-  const {watchlist, favorite} = useSelector(state => state.movie);
+  const watchlist = useSelector(selectWatchlist);
+  const favorite = useSelector(selectFavorite);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
 
   const onRefresh = async () => {
     setRefreshing(true);
-    dispatch(getTicket());
-    dispatch(getMovieLists());
     setTimeout(() => {
       setLoading(false);
       setRefreshing(false);
@@ -30,7 +27,6 @@ const Home = props => {
 
   useEffect(() => {
     onRefresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {

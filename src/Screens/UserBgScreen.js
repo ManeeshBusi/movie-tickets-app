@@ -51,12 +51,13 @@ const UserBg = ({navigation}) => {
             return (
               <Pressable
                 onPress={() => {
-                  dispatch(changeBackground(item.bg));
-                  navigation.goBack();
+                  dispatch(changeBackground(item.bg)).then(() => {
+                    navigation.goBack();
+                  });
                 }}
                 style={({pressed}) => [
                   styles.itemContainer,
-                  {transform: [{scale: pressed ? 1.1 : 1}]},
+                  {transform: [{scale: pressed ? 1.08 : 1}]},
                 ]}>
                 <FastImage
                   style={styles.image}

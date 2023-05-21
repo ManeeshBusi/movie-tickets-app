@@ -6,9 +6,11 @@ import {Button} from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import EmptyContainer from './EmptyContainer.component';
+import {selectTickets} from '../Store/movieSlice';
 
 const Ticketlist = ({navigation}) => {
-  const {tickets} = useSelector(state => state.user);
+  const tickets = useSelector(selectTickets);
+
   const renderItem = ({item, index}) => {
     let customMargin = {};
     if (index === 0) {
@@ -16,10 +18,10 @@ const Ticketlist = ({navigation}) => {
     } else {
       customMargin.marginHorizontal = 8;
     }
-    // console.log('TIIIII', tickets);
+
     return (
       <View style={[customMargin, styles.itemContainer]}>
-        <FastImage style={styles.image} source={{uri: item.movieId.bg}} />
+        <FastImage style={styles.image} source={{uri: item?.movieId?.bg}} />
       </View>
     );
   };

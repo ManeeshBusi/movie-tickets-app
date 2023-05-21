@@ -1,7 +1,6 @@
-/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable prettier/prettier */
-import {View, Text} from 'react-native';
-import React from 'react';
+/* eslint-disable react/no-unstable-nested-components */
+import React, {useEffect} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import TicketScreen from '../Screens/TicketsScreen';
@@ -11,10 +10,11 @@ import {BottomNavigation, useTheme} from 'react-native-paper';
 import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SearchScreen from '../Screens/SearchScreen';
-import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
 import UserScreen from '../Screens/UserScreen';
 import UserBg from '../Screens/UserBgScreen';
 import ListScreen from '../Screens/ListScreen';
+import {useDispatch} from 'react-redux';
+import {getMovieLists, getTicket} from '../Store/movieSlice';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -107,6 +107,13 @@ const LandingTabs = () => {
 };
 
 export default function LoggedInNavigator() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getTicket());
+    dispatch(getMovieLists());
+  });
+
   return (
     <Stack.Navigator
       initialRouteName="Landing"
