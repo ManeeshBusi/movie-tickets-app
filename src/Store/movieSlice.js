@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSelector, createSlice} from '@reduxjs/toolkit';
 import axiosInstance from '../Utils/axiosInstace';
 import {contrastCalc, opacityConverter} from '../Utils/Constants';
 import {theme} from '../Utils/Theme';
+import {signInAgain} from './userSlice';
 
 const initialState = {
   loading: {
@@ -20,6 +21,8 @@ const initialState = {
   tickets: [],
   watchlist: [],
   favorite: [],
+  movies: [],
+  // ticks: [],
 };
 
 export const getTicket = createAsyncThunk(
@@ -27,10 +30,14 @@ export const getTicket = createAsyncThunk(
   async (args, thunkAPI) => {
     const state = thunkAPI.getState().user;
     try {
+      await axiosInstance.get(`/gmail/latest/${state.user?._id}`);
       const res = await axiosInstance.get(`/tickets/${state.user?._id}`);
       return res.data;
     } catch (e) {
       console.log('Error getting tickets', e);
+      if (e.response.status === 500) {
+        thunkAPI.dispatch(signInAgain());
+      }
       thunkAPI.rejectWithValue({error: e, message: 'Error getting tickets'});
     }
   },
@@ -42,8 +49,10 @@ export const addTicket = createAsyncThunk(
     const movieDetails = args;
     const state = thunkAPI.getState().user;
     try {
-      const res = await axiosInstance
-        .post(`/tickets/add/${state.user?._id}`, movieDetails);
+      const res = await axiosInstance.post(
+        `/tickets/add/${state.user?._id}`,
+        movieDetails,
+      );
       return res.data;
     } catch (e) {
       console.log('Error adding new ticket', e);
@@ -72,16 +81,14 @@ export const getMovieLists = createAsyncThunk(
 export const addMovieToList = createAsyncThunk(
   'movie/addMovieToList',
   async (args, thunkAPI) => {
-    const {type, like, movieId} = args;
+    const {type, like, movieDetails} = args;
     const state = thunkAPI.getState().user;
     try {
-      const res = await axiosInstance
-        .post(
-          `/movies/${like}/${type}/${state.user?._id}`,
-          JSON.stringify({movieId}),
-        )
-        .then(data => data.json());
-      return {type, like, movieId};
+      const res = await axiosInstance.post(
+        `/movies/${like}/${type}/${state.user?._id}`,
+        {movieDetails},
+      );
+      return res.data;
     } catch (e) {
       console.log('Error adding movie to list', e);
       thunkAPI.rejectWithValue({
@@ -91,6 +98,22 @@ export const addMovieToList = createAsyncThunk(
     }
   },
 );
+
+export const getLatestTickets = createAsyncThunk(
+  'movie/getLatestTickets',
+  async (args, thunkAPI) => {
+    const state = thunkAPI.getState().user;
+    try {
+      const res = await axiosInstance.get(`/gmail/latest/${state.user?._id}`);
+      // return res.data;
+      console.log('RES TICKSSS', res.data);
+    } catch (e) {
+      console.log('Error getting tickets', e);
+      thunkAPI.rejectWithValue({error: e, message: 'Error getting tickets'});
+    }
+  },
+);
+// export const latestTicks = createAsyncThunk()
 
 export const movieSlice = createSlice({
   name: 'movie',
@@ -109,9 +132,17 @@ export const movieSlice = createSlice({
             ticketArr[i].movieId.color,
             theme.colors.text,
           );
-          ticketArr[i].movieId.mildColor = opacityConverter(ticketArr[i].movieId.color);
+          ticketArr[i].movieId.mildColor = opacityConverter(
+            ticketArr[i].movieId.color,
+          );
+          const {movieId, ...ticketDetails} = ticketArr[i];
+          ticketDetails.movieId = movieId._id;
+          // console.log("MMMMM", movieId);
+          // console.log("TICKET DTAILSD", ticketDetails);
+          state.movies.push(ticketArr[i].movieId);
+          state.tickets.push(ticketDetails);
         }
-        state.tickets = ticketArr;
+        // state.tickets = ticketArr;
         state.error.tickets = null;
         state.loading.tickets = false;
       })
@@ -152,22 +183,35 @@ export const movieSlice = createSlice({
         state.loading.addMovie = true;
       })
       .addCase(addMovieToList.fulfilled, (state, action) => {
-        const {type, like, movieId} = action.payload;
-        if (like === 'add') {
-          state[type].push(movieId);
-        } else {
-          const newArr = state[type].filter(obj => obj._id !== movieId);
-          if (type === 'favorite') {
-            return {...state, favorite: newArr};
-          } else {
-            return {...state, watchlist: newArr};
+        const {type, list, movie} = action.payload;
+        const movieKey = state.movies.findIndex(item => item._id === movie._id);
+        if (type === 'add') {
+          if (movieKey < 0) {
+            state.movies.push(movie);
           }
+          state[list[0]].push(movie._id);
+        } else {
+          const watchlistIndex = state.watchlist.findIndex(
+            item => item === movie._id,
+          );
+          const ticketsIndex = state.tickets.findIndex(
+            item => item.movieId === movie._id,
+          );
+
+          if (watchlistIndex < 0 && ticketsIndex < 0) {
+            state.movies = state.movies.filter(item => item._id !== movie._id);
+          }
+          state[list[0]] = state[list[0]].filter(item => item === movie._id);
         }
         state.loading.addMovie = false;
       })
       .addCase(addMovieToList.rejected, (state, action) => {
         state.error.addMovie = action.payload.message;
         state.loading.addMovie = false;
+      })
+      .addCase(getLatestTickets.fulfilled, (state, action) => {
+        const newTickets = action.payload;
+        state.tickets = [...newTickets, ...state.tickets];
       });
   },
 });
@@ -175,6 +219,7 @@ export const movieSlice = createSlice({
 export const selectTickets = state => state.movie.tickets;
 export const selectWatchlist = state => state.movie.watchlist;
 export const selectFavorite = state => state.movie.favorite;
+export const selectMovies = state => state.movie.movies;
 
 export const selectTicketLoader = state => state.movie.loading.tickets;
 export const selectListLoader = state => state.movie.loading.list;
@@ -185,5 +230,45 @@ export const selectTicketError = state => state.movie.error.tickets;
 export const selectListError = state => state.movie.error.list;
 export const selectAddTicketError = state => state.movie.error.addTicket;
 export const selectAddMovieError = state => state.movie.error.addMovie;
+
+export const selectWatchlistMovies = createSelector(
+  [selectWatchlist, selectMovies],
+  (watchlist, movies) => {
+    return movies.filter(movie => watchlist.includes(movie._id));
+  },
+);
+
+export const selectFavoriteMovies = createSelector(
+  [selectFavorite, selectMovies],
+  (favorite, movies) => {
+    return movies.filter(movie => favorite.includes(movie._id));
+  },
+);
+
+export const isMovieInWatchlist = createSelector(
+  [selectWatchlist, (_, movieId) => movieId],
+  (watchlist, movieId) => {
+    return watchlist.includes(movieId);
+    // return true;
+  },
+);
+
+export const isMovieInFavorite = createSelector(
+  [selectFavorite, (_, movieId) => movieId],
+  (favorite, movieId) => {
+    return favorite.includes(movieId);
+  },
+);
+
+export const selectTicketsWithMovies = createSelector(
+  [selectTickets, selectMovies],
+  (tickets, movies) => {
+    return tickets.map(ticket => {
+      const movie = movies.find(item => item._id === ticket.movieId);
+      const finalItem = {...ticket, movieDetails: movie};
+      return finalItem;
+    });
+  },
+);
 
 export const movieReducer = movieSlice.reducer;

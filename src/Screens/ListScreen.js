@@ -1,17 +1,19 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import {View, StyleSheet, FlatList} from 'react-native';
+import {View, StyleSheet, FlatList, Pressable} from 'react-native';
 import {useTheme} from 'react-native-paper';
 import EmptyContainer from '../Components/EmptyContainer.component';
 import ListItem from '../Components/ListItem.component';
 import BackHeader from '../Components/BackHeader.component';
+import IconButton from '../Components/IconButton.component';
+import Text from '../Utils/Text';
 
 const ListScreen = ({route, navigation}) => {
   const {list, type} = route.params;
   const {colors} = useTheme();
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <BackHeader navigation={navigation} text={type} />
+      <BackHeader goBack={() => navigation.goBack()} text={type} />
       {list?.length !== 0 ? (
         <FlatList
           data={list}

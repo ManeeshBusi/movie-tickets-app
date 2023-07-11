@@ -4,11 +4,11 @@ import {View, StyleSheet} from 'react-native';
 import IconButton from './IconButton.component';
 import Text from '../Utils/Text';
 
-const BackHeader = ({navigation, text}) => {
+const BackHeader = ({goBack, text}) => {
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <IconButton onPress={() => navigation.goBack()} icon="chevron-left" />
+        <IconButton onPress={goBack} icon="chevron-left" />
       </View>
       <View style={styles.textContainer}>
         <Text variant="headlineMedium">{text}</Text>
@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 8,
     alignItems: 'center',
+    zIndex: 99,
   },
   iconContainer: {
     flex: 1,

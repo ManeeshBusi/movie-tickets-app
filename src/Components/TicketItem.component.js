@@ -17,7 +17,7 @@ const ITEM_HEIGHT = 423;
 const dashes = new Array(Math.floor(ITEM_WIDTH / 16)).fill(null);
 
 const TicketItem = memo(({navigation, item, index, spacing, scrollX}) => {
-  const movieDetails = item.movieId;
+  const {movieDetails} = item;
   const {colors} = useTheme();
 
   if (!item.date) {
@@ -60,7 +60,7 @@ const TicketItem = memo(({navigation, item, index, spacing, scrollX}) => {
           <View style={[styles.ticketDetails, {width: ITEM_WIDTH}]}>
             <TouchableOpacity
               onPress={
-                () => navigation.navigate('Movie', {movie: movieDetails})
+                () => navigation.navigate('Movie', {movie: movieDetails, newMovie: false})
                 // navigation.navigate('Movie', {movieId: movieDetails.tmdbId})
               }>
               <Text

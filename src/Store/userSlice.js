@@ -3,6 +3,7 @@ import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import auth from '@react-native-firebase/auth';
 import {API_URL} from '../Utils/Constants';
+import axiosInstance from '../Utils/axiosInstace';
 
 const WEB_CLIENT_ID =
   '698219637049-d721l5562v817a89tv40q9f5n5rkmcsc.apps.googleusercontent.com';
@@ -27,7 +28,6 @@ const initialState = {
 
 async function apiLogin(userInfo) {
   try {
-    console.log('IN API LOGIN');
     const user = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -36,7 +36,6 @@ async function apiLogin(userInfo) {
       },
       body: JSON.stringify(userInfo),
     }).then(data => data.json());
-    console.log('API LOGIN DONE');
     return user;
   } catch (e) {
     console.log('ERROR LOGIN', e);
@@ -46,22 +45,17 @@ async function apiLogin(userInfo) {
 export const refreshTickets = createAsyncThunk(
   'user/refreshTickets',
   async (args, thunkAPI) => {
-    const {user} = thunkAPI.getState();
-    console.log('REFRESH STATE', user);
-    let res = await fetch(`${API_URL}/gmail/messages/${user.user._id}`);
-    console.log('REFRESH CODE', res.status);
+    const state = thunkAPI.getState().user;
+    let res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
     if (res.status === 200) {
       return true;
     } else {
-      console.log('YEP ', user);
-      const {email, name, picture} = user;
-      await GoogleSignin.clearCachedAccessToken(user.user.accessToken);
-      console.log('YEP 2');
+      const {email, name, picture} = state.user;
+      await GoogleSignin.clearCachedAccessToken(state.user.accessToken);
       const {accessToken} = await GoogleSignin.getTokens();
-      user.user.accessToken = accessToken;
+      state.user.accessToken = accessToken;
       await apiLogin({email, name, picture, accessToken});
-      console.log('YEP 3');
-      res = await fetch(`${API_URL}/gmail/messages/${user.user._id}`);
+      res = await fetch(`${API_URL}/gmail/messages/${state.user._id}`);
       if (res.code === 200) {
         return true;
       }
@@ -75,7 +69,7 @@ export const signInWithGoogle = createAsyncThunk(
     try {
       const {idToken} = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      const userAv = await auth()
+      const signedInUser = await auth()
         .signInWithCredential(googleCredential)
         .then(data => {
           return data.additionalUserInfo.profile;
@@ -88,7 +82,7 @@ export const signInWithGoogle = createAsyncThunk(
           return creds.additionalUserInfo.profile;
         });
 
-      const {email, name, picture} = userAv;
+      const {email, name, picture} = signedInUser;
       const {accessToken} = await GoogleSignin.getTokens();
       const userDetails = await apiLogin({email, name, picture, accessToken});
 
@@ -118,9 +112,7 @@ export const signInAgain = createAsyncThunk(
       const currentUser = await GoogleSignin.getCurrentUser();
       const {name, photo: picture, email} = currentUser.user;
       const {accessToken} = await GoogleSignin.getTokens();
-
       const userDetails = await apiLogin({email, name, picture, accessToken});
-
       return userDetails;
     } catch (e) {
       throw new Error('Login Error');
@@ -148,6 +140,21 @@ export const changeBackground = createAsyncThunk(
       return {background};
     } catch (e) {
       console.log('Error adding background', e);
+    }
+  },
+);
+
+export const getUser = createAsyncThunk(
+  'user/getUser',
+  async (args, thunkAPI) => {
+    const state = thunkAPI.getState().user;
+    try {
+      const res = await axiosInstance.get(`/auth/${state.user._id}`);
+      return res.data;
+      // return res.data;
+    } catch (e) {
+      console.log('Error getting user', e);
+      thunkAPI.rejectWithValue({error: e, msg: 'Error getting user'});
     }
   },
 );
@@ -190,8 +197,13 @@ export const userSlice = createSlice({
       .addCase(changeBackground.fulfilled, (state, action) => {
         const {background} = action.payload;
         state.user.background = background;
+      })
+      .addCase(getUser.fulfilled, (state, action) => {
+        state.user = {...action.payload, watchlist: null, favorite: null};
       });
   },
 });
+
+export const selectUser = state => state.user.user;
 
 export const userReducer = userSlice.reducer;

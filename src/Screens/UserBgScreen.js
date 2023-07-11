@@ -57,7 +57,7 @@ const UserBg = ({navigation}) => {
                 }}
                 style={({pressed}) => [
                   styles.itemContainer,
-                  {transform: [{scale: pressed ? 1.08 : 1}]},
+                  {transform: [{scale: pressed ? 0.98 : 1}]},
                 ]}>
                 <FastImage
                   style={styles.image}

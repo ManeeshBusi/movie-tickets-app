@@ -4,10 +4,12 @@ import {StyleSheet, Pressable} from 'react-native';
 import {useTheme} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const IconButton = ({onPress, icon, color}) => {
+const IconButton = ({onPress, icon, color, style, ...rest}) => {
   const {colors} = useTheme();
+  console.log("PRS", onPress)
   return (
     <Pressable
+      {...rest}
       onPress={onPress}
       style={({pressed}) => [
         styles.container,
@@ -15,7 +17,9 @@ const IconButton = ({onPress, icon, color}) => {
           backgroundColor: colors.background,
           transform: [{scale: pressed ? 1.1 : 1}],
         },
-      ]}>
+        style,
+      ]}
+      >
       <Icon name={icon} size={25} color={colors.primary} />
     </Pressable>
   );

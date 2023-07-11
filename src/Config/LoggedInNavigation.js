@@ -13,8 +13,6 @@ import SearchScreen from '../Screens/SearchScreen';
 import UserScreen from '../Screens/UserScreen';
 import UserBg from '../Screens/UserBgScreen';
 import ListScreen from '../Screens/ListScreen';
-import {useDispatch} from 'react-redux';
-import {getMovieLists, getTicket} from '../Store/movieSlice';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -107,12 +105,6 @@ const LandingTabs = () => {
 };
 
 export default function LoggedInNavigator() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getTicket());
-    dispatch(getMovieLists());
-  });
 
   return (
     <Stack.Navigator

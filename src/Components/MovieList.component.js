@@ -6,8 +6,7 @@ import {Button} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import EmptyContainer from './EmptyContainer.component';
 
-const Watchlist = ({navigation, type, list}) => {
-
+const MovieList = ({navigation, type, list}) => {
   const renderItem = ({item, index}) => {
     let customMargin = {};
     if (index === 0) {
@@ -18,7 +17,9 @@ const Watchlist = ({navigation, type, list}) => {
     return (
       <TouchableOpacity
         style={[customMargin, styles.itemContainer]}
-        onPress={() => navigation.navigate('Movie', {movieId: item.tmdbId})}>
+        onPress={() =>
+          navigation.navigate('Movie', {movie: item, newMovie: false})
+        }>
         <FastImage
           style={styles.image}
           source={{
@@ -88,4 +89,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Watchlist;
+export default MovieList;

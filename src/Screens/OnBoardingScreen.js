@@ -15,6 +15,7 @@ import FastImage from 'react-native-fast-image';
 import {useTheme} from 'react-native-paper';
 import Text from '../Utils/Text';
 import IconButton from '../Components/IconButton.component';
+import Toast from 'react-native-toast-message';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
@@ -22,7 +23,9 @@ export default function OnBoardingScreen() {
   const dispatch = useDispatch();
   const {colors} = useTheme();
   const signInWithGoogleAction = () => {
-    dispatch(signInWithGoogle());
+    dispatch(signInWithGoogle()).then(() => {
+      Toast.show({type: 'success', text1: 'You have logged in sucessfully!'});
+    });
   };
   const PAGES = [
     {

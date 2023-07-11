@@ -68,7 +68,7 @@ const SearchScreen = ({navigation}) => {
           renderItem={({item, index}) => {
             return (
               <ListItem
-                onPress={() => navigation.navigate('Movie', {movieId: item.id})}
+                onPress={() => navigation.navigate('Movie', {movie: {tmdbId: item.id}, newMovie: true})}
                 image={
                   item.backdrop_path
                     ? bg_path + item.backdrop_path

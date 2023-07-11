@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, {useRef, useEffect, useState} from 'react';
+import React, {useRef, useEffect, useState, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -14,19 +14,25 @@ import IconButton from '../Components/IconButton.component';
 import Loading from '../Components/Loading.component';
 import TicketItem from '../Components/TicketItem.component';
 import TicketForm from '../Components/TicketForm.component';
-import {selectTickets} from '../Store/movieSlice';
+import {selectTicketsWithMovies} from '../Store/movieSlice';
+import FastImage from 'react-native-fast-image';
+import _ from 'lodash';
 
 const {width} = Dimensions.get('window');
 const ITEM_SIZE = 320;
 
 const TicketScreen = ({navigation}) => {
   // eslint-disable-next-line no-unused-vars
-  const {user, fetchedMessages} = useSelector(state => state.user);
-  const tickets = useSelector(selectTickets);
+  // const {user, fetchedMessages} = useSelector(state => state.user);
+  // const tickets = useSelector(selectTickets);
+  const tickets = useSelector(selectTicketsWithMovies);
 
   const [imgLoading, setImgLoading] = useState(true);
+  const [backgroundImage, setBackground] = useState(null);
+  const [bgIndex, setBgIndex] = useState(null);
 
   const scrollX = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const spacing = (width - ITEM_SIZE) / 2;
 
@@ -34,9 +40,37 @@ const TicketScreen = ({navigation}) => {
     setImgLoading(false);
   }, []);
 
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start(() => {
+      if (bgIndex) {
+        setBackground(tickets[bgIndex].movieDetails.bg);
+      } else {
+        setBackground(tickets[0].movieDetails.bg);
+      }
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bgIndex]);
+
   const [modalVisible, setModalVisible] = useState(false);
 
   const {colors} = useTheme();
+
+  const onViewableItemsChanged = useRef(_.debounce(({viewableItems}) => {
+    if (viewableItems.length > 0) {
+      const index = viewableItems[0].index;
+      index > 1 && setBgIndex(index - 1);
+    }
+  }, 1000)
+  ).current;
 
   if (imgLoading) {
     return <Loading loading={imgLoading} />;
@@ -71,7 +105,7 @@ const TicketScreen = ({navigation}) => {
               return (
                 <AnimatedFastImage
                   key={item._id}
-                  source={{uri: item.movieId.bg}}
+                  source={{uri: item.movieDetails.bg}}
                   // style={[StyleSheet.absoluteFill, {opacity}]}
                   style={[StyleSheet.absoluteFillObject, {transform: [{translateX}]}]}
                 />
@@ -79,6 +113,16 @@ const TicketScreen = ({navigation}) => {
             })}
              <View style={[styles.overlay, StyleSheet.absoluteFillObject]} />
            </View> */}
+          {backgroundImage && (
+            <Animated.View
+              style={[StyleSheet.absoluteFill, {opacity: fadeAnim}]}>
+              <FastImage
+                source={{uri: backgroundImage}}
+                style={{...StyleSheet.absoluteFillObject}}
+              />
+              <View style={[StyleSheet.absoluteFillObject, styles.overlay]} />
+            </Animated.View>
+          )}
           {tickets?.length !== 0 && (
             <Animated.FlatList
               data={[{_id: 'left'}, ...tickets, {_id: 'right'}]}
@@ -108,6 +152,8 @@ const TicketScreen = ({navigation}) => {
               maxToRenderPerBatch={3}
               updateCellsBatchingPeriod={2000}
               windowSize={10}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={{viewAreaCoveragePercentThreshold: 50}}
             />
           )}
           <TicketForm

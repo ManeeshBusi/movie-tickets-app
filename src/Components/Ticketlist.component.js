@@ -2,14 +2,17 @@
 import React from 'react';
 import {View, StyleSheet, FlatList} from 'react-native';
 import Text from '../Utils/Text';
-import {Button} from 'react-native-paper';
+import {Button, useTheme} from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import EmptyContainer from './EmptyContainer.component';
-import {selectTickets} from '../Store/movieSlice';
+import {selectTicketsWithMovies} from '../Store/movieSlice';
+
+const today = Date.now() / 1000;
 
 const Ticketlist = ({navigation}) => {
-  const tickets = useSelector(selectTickets);
+  const tickets = useSelector(selectTicketsWithMovies);
+  const {colors} = useTheme();
 
   const renderItem = ({item, index}) => {
     let customMargin = {};
@@ -21,7 +24,16 @@ const Ticketlist = ({navigation}) => {
 
     return (
       <View style={[customMargin, styles.itemContainer]}>
-        <FastImage style={styles.image} source={{uri: item?.movieId?.bg}} />
+        {item.datetime > today && (
+          <View
+            style={[styles.upcomingContainer, {backgroundColor: colors.primary}]}>
+            <Text color="textDark">Upcoming</Text>
+          </View>
+        )}
+        <FastImage
+          style={styles.image}
+          source={{uri: item?.movieDetails?.bg}}
+        />
       </View>
     );
   };
@@ -55,7 +67,7 @@ const Ticketlist = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 24,
+    marginBottom: 12,
     paddingBottom: 12,
   },
   itemContainer: {
@@ -82,6 +94,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.95,
     shadowRadius: 20.0,
   },
+  upcomingContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 24,
+    zIndex: 9,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    paddingBottom: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 export default Ticketlist;

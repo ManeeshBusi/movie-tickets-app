@@ -15,37 +15,41 @@ import LinearGradient from 'react-native-linear-gradient';
 import IconButton from '../Components/IconButton.component';
 import FastImage from 'react-native-fast-image';
 import {useDispatch, useSelector} from 'react-redux';
-import {likeMovie} from '../Store/userSlice';
 import {poster_path, bg_path} from '../Utils/Constants';
 import Loading from '../Components/Loading.component';
+import {
+  addMovieToList,
+  isMovieInFavorite,
+  isMovieInWatchlist,
+} from '../Store/movieSlice';
 
 const {width: PAGE_WIDTH} = Dimensions.get('window');
 
 const MovieScreen = ({route, navigation}) => {
   const {colors} = useTheme();
-  const {movie, movieId} = route.params;
+  const {movie, newMovie} = route.params;
   const dispatch = useDispatch();
 
-  const [movieDetails, setMovie] = useState(movie ? movie : null);
+  const [movieDetails, setMovie] = useState(movie ?? null);
   const [streaming, setStreaming] = useState(null);
-  const [fetchingMovie, setFetching] = useState(movieId ? true : false);
+  const [fetchingMovie, setFetching] = useState(newMovie ? true : false);
 
-  const {favorite, watchlist} = useSelector(state => state.user);
-
-  const [isLiked, setIsLiked] = useState(
-    favorite.some(fav => fav._id.includes(movieDetails?._id)) ?? false,
+  const inWatchlist = useSelector(state =>
+    isMovieInWatchlist(state, movie.tmdbId),
   );
-  const [isInList, setIsList] = useState(
-    watchlist.some(item => item._id.includes(movieDetails?._id)) ?? false,
+  const inFavorite = useSelector(state =>
+    isMovieInFavorite(state, movie._id),
   );
+  const [isLiked, setIsLiked] = useState(inFavorite);
+  const [isInList, setIsList] = useState(inWatchlist);
 
   const getMovie = async () => {
     const res = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}?api_key=b36be16db427f6f84a8c93802b633757&language=en-US`,
+      `https://api.themoviedb.org/3/movie/${movie.tmdbId}?api_key=b36be16db427f6f84a8c93802b633757&language=en-US`,
     )
       .then(data => data.json())
       .catch(e => {
-        console.log('ERROR MOVEI', e);
+        console.log('ERROR MOVIE', e);
       });
     const {
       id: tmdbId,
@@ -70,8 +74,7 @@ const MovieScreen = ({route, navigation}) => {
       const {id, name} = res.belongs_to_collection;
       movieParams.series = {id, name};
     }
-    console.log('PARAMS', res);
-    console.log('LALALALA', res.spoken_languages);
+
     movieParams.language =
       res.spoken_languages.length !== 0
         ? res.spoken_languages[0].english_name
@@ -82,15 +85,14 @@ const MovieScreen = ({route, navigation}) => {
   };
 
   useEffect(() => {
-    if (movieId) {
-      console.log('USE EFFECT MOVIEID', movieId);
+    if (newMovie) {
       setFetching(true);
       getMovie().then(() => {
         setFetching(false);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [movieId]);
+  }, [newMovie]);
 
   useEffect(() => {
     const getStream = async () => {
@@ -118,10 +120,10 @@ const MovieScreen = ({route, navigation}) => {
 
   const onLikePress = () => {
     dispatch(
-      likeMovie({
+      addMovieToList({
         type: 'favorite',
         like: isLiked ? 'delete' : 'add',
-        movie: movieDetails,
+        movieDetails,
       }),
     );
     setIsLiked(!isLiked);
@@ -129,10 +131,10 @@ const MovieScreen = ({route, navigation}) => {
 
   const onListPress = () => {
     dispatch(
-      likeMovie({
+      addMovieToList({
         type: 'watchlist',
         like: isInList ? 'delete' : 'add',
-        movie: movieDetails,
+        movieDetails,
       }),
     );
     setIsList(!isInList);
@@ -281,7 +283,7 @@ const styles = StyleSheet.create({
   genreContainer: {
     flexDirection: 'row',
     marginBottom: 4,
-    width: PAGE_WIDTH,
+    width: PAGE_WIDTH / 1.2,
     flexWrap: 'wrap',
   },
   genreItem: {
